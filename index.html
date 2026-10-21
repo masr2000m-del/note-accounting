@@ -9,6 +9,11 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="نوت الحسابات">
   <title>📒 نوت الحسابات</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <!-- html2pdf: لتصدير PDF يدعم الخط العربي بشكل صحيح -->
@@ -3960,6 +3965,13 @@ _تم إرسال هذا التقرير لاعتماد وتسوية الحساب.
     window.addEventListener('beforeunload', function() {
       autoSave();
     });
+
+    // تسجيل Service Worker حتى يعمل التطبيق كتطبيق موبايل وبدون إنترنت
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('./sw.js').catch(function() {});
+      });
+    }
   </script>
 </body>
 </html>
