@@ -232,6 +232,7 @@
     .actions .action-clear { order: 7; }
     .more-actions { display: contents; }
     .more-toggle { display: none; }
+    .mobile-pin-row { display: none; }
 
     .edit-btn {
       background: var(--secondary);
@@ -884,11 +885,36 @@
       .actions > .action-copy { order: 2; }
       .actions > .action-clear { order: 3; }
 
+      /* صف تثبيت الوصف أسفل صف الأزرار الأساسية وعلى مستوى كامل */
+      .actions > .mobile-pin-row {
+        order: 4;
+        grid-column: 1 / -1;
+        display: flex;
+        gap: 8px;
+        align-items: stretch;
+        min-width: 0;
+      }
+
+      .actions > .mobile-pin-row:empty {
+        display: none;
+      }
+
+      .mobile-pin-row .btn-clear-desc {
+        flex: 0 0 auto;
+        padding: 11px 15px;
+      }
+
+      .mobile-pin-row .pin-desc-btn {
+        flex: 1 1 auto;
+        justify-content: center;
+        min-height: 46px;
+      }
+
       .enter-hint { display: none; }
 
       /* تبويب صغير لفتح باقي الأزرار */
       .actions .more-toggle {
-        order: 4;
+        order: 5;
         grid-column: 1 / -1;
         justify-self: center;
         display: inline-flex;
@@ -918,7 +944,7 @@
 
       .actions .more-actions {
         display: none;
-        order: 5;
+        order: 6;
         grid-column: 1 / -1;
         grid-template-columns: 1fr 1fr;
         gap: 7px;
@@ -1429,10 +1455,42 @@
         <button class="btn-primary action-copy" onclick="copyBalanceWithoutDecimals()">📋 نسخ الإجمالي</button>
         <button class="btn-danger action-clear" onclick="clearTransactions()">🗑️ مسح الكل</button>
 
+        <div class="mobile-pin-row" id="mobilePinRow" role="group" aria-label="تثبيت وصف العملية"></div>
+
         <button type="button" class="more-toggle" id="moreActionsToggle" aria-expanded="false" aria-controls="moreActionsGroup" onclick="toggleMoreActions(this)">
           <span>⚙️</span><span class="more-label">المزيد</span><span class="chev">▾</span>
         </button>
       </div>
+
+      <script>
+        // على الموبايل: نقل صف تثبيت الوصف ليصبح بعد صف الأزرار الأساسية
+        // وعلى الكمبيوتر: إعادته بجوار حقل الوصف كما كان
+        (function () {
+          var mobileQuery = window.matchMedia('(max-width: 768px)');
+          var descContainer = document.querySelector('.desc-input-container');
+          var mobileRow = document.getElementById('mobilePinRow');
+          var clearBtn = document.getElementById('clearDescBtn');
+          var pinBtn = document.getElementById('pinDescBtn');
+
+          function placePinButtons() {
+            if (!descContainer || !mobileRow || !clearBtn || !pinBtn) return;
+            if (mobileQuery.matches) {
+              mobileRow.appendChild(clearBtn);
+              mobileRow.appendChild(pinBtn);
+            } else {
+              descContainer.appendChild(clearBtn);
+              descContainer.appendChild(pinBtn);
+            }
+          }
+
+          placePinButtons();
+          if (mobileQuery.addEventListener) {
+            mobileQuery.addEventListener('change', placePinButtons);
+          } else if (mobileQuery.addListener) {
+            mobileQuery.addListener(placePinButtons);
+          }
+        })();
+      </script>
 
       <table id="transactionsTable">
         <thead>
