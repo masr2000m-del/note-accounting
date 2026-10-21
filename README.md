@@ -1,2 +1,10 @@
-# note-accounting
-Note Accounting mobile web app
+# نوت الحسابات — نسخة الموبايل
+
+تطبيق محاسبة عربي خفيف يعمل بالكامل في المتصفح.
+
+🔗 **التطبيق:** https://masr2000m-del.github.io/note-accounting/
+
+## ملاحظات
+- البيانات تُحفظ محليًا في متصفح كل جهاز (localStorage).
+- لا يوجد سيرفر أو قاعدة بيانات؛ الموقع ثابت ومجاني عبر GitHub Pages.
+- لتحديث التطبيق: استبدل ملف index.html بنسخة جديدة.
