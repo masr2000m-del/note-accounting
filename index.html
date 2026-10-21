@@ -1,0 +1,3907 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" id="themeColorMeta" content="#eef2f7">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="نوت الحسابات">
+  <title>📒 نوت الحسابات</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- html2pdf: لتصدير PDF يدعم الخط العربي بشكل صحيح -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- html2canvas: لتصدير التقرير كصورة بجودة عالية للواتساب -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    :root {
+      --primary: #2196f3;
+      --primary-dark: #1976d2;
+      --secondary: #ff9800;
+      --secondary-dark: #e68900;
+      --danger: #f44336;
+      --danger-dark: #d32f2f;
+      --success: #4caf50;
+      --success-dark: #388e3c;
+      --warning: #ffc107;
+      --warning-dark: #ffa000;
+      --light: #f5f5f5;
+      --dark: #333;
+      --gray: #ddd;
+      --text: #333;
+      --bg: #eef2f7;
+      --card-bg: #fff;
+      --shadow: rgba(0,0,0,0.15);
+    }
+
+    [data-theme="dark"] {
+      --primary: #42a5f5;
+      --primary-dark: #1976d2;
+      --secondary: #ffb74d;
+      --secondary-dark: #f57c00;
+      --danger: #ef5350;
+      --danger-dark: #d32f2f;
+      --success: #66bb6a;
+      --success-dark: #388e3c;
+      --warning: #ffd54f;
+      --warning-dark: #ffb300;
+      --light: #424242;
+      --dark: #f5f5f5;
+      --gray: #616161;
+      --text: #f5f5f5;
+      --bg: #121212;
+      --card-bg: #1e1e1e;
+      --shadow: rgba(255,255,255,0.1);
+    }
+
+    html {
+      background: var(--bg);
+      -webkit-text-size-adjust: 100%;
+    }
+
+    * {
+      transition: background-color 0.3s, color 0.3s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button, .tab, select, input {
+      touch-action: manipulation;
+    }
+
+    body {
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: var(--bg);
+      margin: 0;
+      padding: 20px;
+      color: var(--text);
+    }
+
+    h2 {
+      text-align: center;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    input, button, select {
+      padding: 10px;
+      border: 1px solid var(--gray);
+      border-radius: 8px;
+      font-size: 16px;
+      background: var(--card-bg);
+      color: var(--text);
+    }
+
+    input {
+      flex: 1;
+      min-width: 120px;
+    }
+
+    input:focus, select:focus {
+      outline: 2px solid var(--primary);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: var(--secondary);
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: var(--secondary-dark);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: var(--danger-dark);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: var(--success-dark);
+    }
+
+    .btn-warning {
+      background: var(--warning);
+      color: var(--dark);
+    }
+
+    .btn-warning:hover {
+      background: var(--warning-dark);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      border: 1px solid var(--gray);
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background: var(--light);
+      color: var(--text);
+    }
+
+    .summary {
+      margin-top: 20px;
+      font-size: 18px;
+      text-align: center;
+      font-weight: bold;
+      padding: 15px;
+      background: var(--light);
+      border-radius: 8px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* ترتيب أزرار سطح المكتب كما هو + تجهيز مجموعة الخيارات الإضافية */
+    .actions .action-main { order: 1; }
+    .actions .action-advanced { order: 2; }
+    .actions .action-save { order: 3; }
+    .actions .action-export { order: 4; }
+    .actions .action-copy { order: 5; }
+    .actions .action-report { order: 6; }
+    .actions .action-clear { order: 7; }
+    .more-actions { display: contents; }
+    .more-toggle { display: none; }
+
+    .edit-btn {
+      background: var(--secondary);
+      color: white;
+    }
+
+    .edit-btn:hover {
+      background: var(--secondary-dark);
+    }
+
+    .delete-btn {
+      background: var(--danger);
+      color: white;
+    }
+
+    .delete-btn:hover {
+      background: var(--danger-dark);
+    }
+
+    .restore-btn {
+      background: var(--success);
+      color: white;
+    }
+
+    .restore-btn:hover {
+      background: var(--success-dark);
+    }
+
+    .stats-container {
+      display: flex;
+      justify-content: space-between;
+      margin: 20px 0;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px var(--shadow);
+      flex: 1;
+      min-width: 150px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 5px 0;
+    }
+
+    .positive {
+      color: var(--success);
+    }
+
+    .negative {
+      color: var(--danger);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    @keyframes highlightInsert {
+      0% { background-color: rgba(255, 152, 0, 0.6); }
+      50% { background-color: rgba(255, 193, 7, 0.4); }
+      100% { background-color: transparent; }
+    }
+
+    .new-inserted-row td {
+      animation: highlightInsert 2.5s ease-out;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    .search-container {
+      margin: 15px 0;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .search-count {
+      font-size: 14px;
+      white-space: nowrap;
+      min-width: 70px;
+      text-align: center;
+    }
+
+    /* صفوف نتائج البحث داخل الجدول الكامل */
+    tr.search-match td {
+      background: rgba(255, 193, 7, 0.25);
+    }
+
+    tr.search-current td {
+      background: rgba(255, 152, 0, 0.55);
+      font-weight: bold;
+    }
+
+    tr.search-current {
+      outline: 3px solid var(--secondary);
+      outline-offset: -3px;
+    }
+
+    .filter-container {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    .discount-info {
+      background: var(--light);
+      padding: 8px 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .tabs {
+      display: flex;
+      margin: 20px 0;
+      border-bottom: 1px solid var(--gray);
+    }
+
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab.active {
+      border-bottom: 3px solid var(--primary);
+      font-weight: bold;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .trash-indicator {
+      position: relative;
+    }
+
+    .trash-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: var(--danger);
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sort-options {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin: 10px 0;
+    }
+
+    .sort-btn {
+      background: var(--light);
+      color: var(--text);
+      border: 1px solid var(--gray);
+    }
+
+    .sort-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .discount-display {
+      font-size: 12px;
+      color: var(--secondary);
+      margin-top: 2px;
+    }
+
+    .saved-logs-container {
+      margin: 15px 0;
+    }
+
+    .log-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      margin: 5px 0;
+      background: var(--light);
+      border-radius: 8px;
+      border: 1px solid var(--gray);
+    }
+
+    .log-actions {
+      display: flex;
+      gap: 5px;
+    }
+
+    .small-btn {
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+
+    .navigation-hint {
+      position: absolute;
+      top: -8px;
+      left: 8px;
+      background: var(--primary);
+      color: white;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    .input-container {
+      position: relative;
+      flex: 1;
+    }
+
+    .desc-input-container {
+      position: relative;
+      flex: 2;
+      min-width: 250px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .desc-input-container input {
+      flex: 1;
+      width: 100%;
+      min-width: 120px;
+    }
+
+    .pin-desc-btn {
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 8px;
+      white-space: nowrap;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+      user-select: none;
+      border: 1.5px solid transparent;
+      box-sizing: border-box;
+    }
+
+    .pin-desc-btn.pinned-debit {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-color: #60a5fa;
+    }
+    [data-theme="dark"] .pin-desc-btn.pinned-debit {
+      background: rgba(33, 150, 243, 0.2);
+      color: #93c5fd;
+      border-color: #3b82f6;
+    }
+
+    .pin-desc-btn.pinned-credit {
+      background: #f0fdf4;
+      color: #15803d;
+      border-color: #4ade80;
+    }
+    [data-theme="dark"] .pin-desc-btn.pinned-credit {
+      background: rgba(76, 175, 80, 0.2);
+      color: #86efac;
+      border-color: #22c55e;
+    }
+
+    .pin-desc-btn.unpinned {
+      background: var(--card-bg);
+      color: var(--text);
+      opacity: 0.65;
+      border: 1.5px dashed var(--gray);
+    }
+
+    .btn-clear-desc {
+      background: var(--card-bg);
+      color: var(--text);
+      border: 1px solid var(--gray);
+      border-radius: 8px;
+      padding: 10px 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      opacity: 0.7;
+      transition: all 0.2s;
+      box-sizing: border-box;
+    }
+    .btn-clear-desc:hover {
+      opacity: 1;
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+
+    .navigation-info {
+      background: var(--light);
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .arrow-key {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+      margin: 0 2px;
+      font-size: 12px;
+    }
+
+    .auto-save-indicator {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: var(--success);
+      color: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 1000;
+    }
+
+    .auto-save-indicator.show {
+      opacity: 1;
+    }
+
+    /* عناصر تظهر على الهاتف فقط */
+    .mobile-only { display: none; }
+
+    /* ====== تنسيقات شاشة الهاتف ====== */
+    @media (max-width: 768px) {
+      body {
+        padding: 0;
+        overscroll-behavior-y: contain;
+      }
+
+      .container {
+        max-width: 100%;
+        min-height: 100vh;
+        border-radius: 0;
+        padding: 12px 12px calc(24px + env(safe-area-inset-bottom));
+        box-shadow: none;
+        box-sizing: border-box;
+      }
+
+      .header-row {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      h2 {
+        font-size: 19px;
+        margin: 0;
+        flex: 1;
+      }
+
+      .controls {
+        width: auto;
+        gap: 6px;
+        flex-wrap: nowrap;
+      }
+
+      .theme-toggle {
+        font-size: 22px;
+        padding: 5px 8px;
+      }
+
+      .btn-warning.trash-indicator {
+        padding: 9px 11px;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      /* تلميحات أسهم الكيبورد لا تفيد على الهاتف */
+      .navigation-info,
+      .navigation-hint {
+        display: none;
+      }
+
+      /* التبويبات: شريط أفقي ثابت قابل للسحب */
+      .tabs {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        flex-direction: row;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        background: var(--card-bg);
+        margin: 10px -12px 12px;
+        padding: 0 12px;
+        box-shadow: 0 3px 8px var(--shadow);
+      }
+
+      .tabs::-webkit-scrollbar {
+        display: none;
+      }
+
+      .tab {
+        flex: 0 0 auto;
+        white-space: nowrap;
+        padding: 12px 14px;
+        font-size: 14px;
+      }
+
+      /* الإحصائيات: شبكة 2×2 */
+      .stats-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin: 12px 0;
+      }
+
+      .stat-card {
+        min-width: 0;
+        padding: 10px 8px;
+      }
+
+      .stat-value {
+        font-size: 19px;
+      }
+
+      .discount-info {
+        font-size: 13px;
+        padding: 10px 12px;
+        line-height: 1.9;
+      }
+
+      .discount-info select {
+        display: block;
+        width: 100%;
+        margin: 4px 0 0;
+        box-sizing: border-box;
+      }
+
+      /* البحث */
+      .search-container {
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 12px 0;
+      }
+
+      .search-container input {
+        flex: 1 1 100%;
+        min-width: 0;
+      }
+
+      .search-count {
+        flex: 1 1 auto;
+        min-width: 60px;
+      }
+
+      .search-container .sort-btn {
+        min-width: 56px;
+        min-height: 44px;
+      }
+
+      /* الترتيب والفلاتر */
+      .filter-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        margin: 12px 0;
+      }
+
+      .sort-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        margin: 0;
+      }
+
+      .sort-options > span {
+        grid-column: 1 / -1;
+        font-size: 13px;
+      }
+
+      .sort-options .sort-btn {
+        font-size: 12.5px;
+        padding: 10px 6px;
+      }
+
+      .filter-container > .btn-primary {
+        width: 100%;
+      }
+
+      /* نموذج الإدخال */
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .form-row .input-container {
+        min-width: 0;
+      }
+
+      .form-row .input-container input {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+      }
+
+      .form-row .input-container:nth-child(3) {
+        grid-column: 1 / -1;
+      }
+
+      .desc-input-container {
+        grid-column: 1 / -1;
+        width: 100%;
+        min-width: 0;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .desc-input-container input {
+        flex: 1 1 100%;
+        min-width: 0;
+        box-sizing: border-box;
+      }
+
+      .btn-clear-desc {
+        flex: 0 0 auto;
+        padding: 11px 15px;
+      }
+
+      .pin-desc-btn {
+        flex: 1 1 auto;
+        justify-content: center;
+        min-height: 46px;
+      }
+
+      /* منع تكبير الشاشة تلقائياً عند الكتابة في الحقول على الآيفون */
+      input, select, textarea {
+        font-size: 16px !important;
+      }
+
+      /* إخفاء أسهم حقول الأرقام الصغيرة لأنها غير مناسبة على الهاتف */
+      input[type="number"]::-webkit-outer-spin-button,
+      input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      input[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+      }
+
+      /* الأزرار: صف أساسي من 3 أزرار + تبويب للخيارات الإضافية */
+      .actions {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr 1fr;
+        gap: 7px;
+        margin-top: 12px;
+        align-items: center;
+      }
+
+      .actions > button,
+      .more-actions > button {
+        width: 100%;
+        min-width: 0 !important;
+        min-height: 42px;
+        padding: 6px 4px;
+        font-size: 11.5px;
+        line-height: 1.35;
+        border-radius: 8px;
+      }
+
+      .actions > .action-main {
+        order: 1;
+        min-height: 54px;
+        padding: 8px 6px;
+        font-size: 14px;
+        border-radius: 9px;
+      }
+
+      .actions > .action-copy { order: 2; }
+      .actions > .action-clear { order: 3; }
+
+      .enter-hint { display: none; }
+
+      /* تبويب صغير لفتح باقي الأزرار */
+      .actions .more-toggle {
+        order: 4;
+        grid-column: 1 / -1;
+        justify-self: center;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        width: auto;
+        min-height: 30px;
+        padding: 3px 14px;
+        margin-top: 2px;
+        background: var(--light);
+        color: var(--text);
+        border: 1px solid var(--gray);
+        border-radius: 999px;
+        font-size: 11.5px;
+        font-weight: bold;
+      }
+
+      .actions .more-toggle .chev {
+        display: inline-block;
+        transition: transform 0.2s;
+      }
+
+      .actions.expanded .more-toggle .chev {
+        transform: rotate(180deg);
+      }
+
+      .actions .more-actions {
+        display: none;
+        order: 5;
+        grid-column: 1 / -1;
+        grid-template-columns: 1fr 1fr;
+        gap: 7px;
+      }
+
+      .actions.expanded .more-actions {
+        display: grid;
+      }
+
+      /* تحويل جدول العمليات إلى بطاقات */
+      #transactionsTable,
+      #trashTable {
+        display: block;
+        margin-top: 12px;
+      }
+
+      #transactionsTable thead,
+      #trashTable thead {
+        display: none;
+      }
+
+      #transactionsTable tbody,
+      #trashTable tbody {
+        display: block;
+      }
+
+      #trashTable tr {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2px 10px;
+        background: var(--card-bg);
+        border: 1px solid var(--gray);
+        border-radius: 12px;
+        padding: 10px 12px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 5px var(--shadow);
+      }
+
+      #trashTable td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        border: none;
+        padding: 3px 0;
+        text-align: right;
+        font-size: 14px;
+        min-width: 0;
+        word-break: break-word;
+      }
+
+      #trashTable td::before {
+        content: attr(data-label);
+        font-size: 12px;
+        color: #8b8b8b;
+        font-weight: normal;
+        flex: 0 0 auto;
+      }
+
+      [data-theme="dark"] #trashTable td::before {
+        color: #a5a5a5;
+      }
+
+      /* شريط العملية المضغوط */
+      #transactionsTable tr {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 2px 5px;
+        background: var(--card-bg);
+        border: 1px solid var(--gray);
+        border-inline-start: 3px solid var(--primary);
+        border-radius: 7px;
+        padding: 4px 8px;
+        margin-bottom: 5px;
+        box-shadow: 0 1px 2px var(--shadow);
+      }
+
+      /* فاصل الأسطر داخل الشريط */
+      #transactionsTable tr::after {
+        content: "";
+        flex-basis: 100%;
+        height: 0;
+        order: 5;
+      }
+
+      /* لون طرف الشريط حسب نوع العملية */
+      #transactionsTable tr.debit-row {
+        border-inline-start-color: var(--success);
+      }
+
+      #transactionsTable tr.credit-row {
+        border-inline-start-color: var(--danger);
+      }
+
+      #transactionsTable td {
+        display: flex;
+        align-items: baseline;
+        gap: 3px;
+        border: none;
+        padding: 0;
+        text-align: right;
+        font-size: 12.5px;
+        line-height: 1.35;
+        min-width: 0;
+        word-break: break-word;
+      }
+
+      #transactionsTable td::before {
+        content: attr(data-label);
+        font-size: 10px;
+        color: #8b8b8b;
+        font-weight: normal;
+        flex: 0 0 auto;
+      }
+
+      [data-theme="dark"] #transactionsTable td::before {
+        color: #a5a5a5;
+      }
+
+      /* السطر الأول: الرقم والتاريخ والوصف والرصيد */
+      #transactionsTable td:nth-child(1) {
+        order: 1;
+        flex: 0 0 auto;
+        background: var(--primary);
+        color: #fff;
+        font-size: 10.5px;
+        font-weight: bold;
+        border-radius: 4px;
+        padding: 0 5px;
+      }
+
+      #transactionsTable td:nth-child(1)::before {
+        content: none;
+      }
+
+      #transactionsTable td:nth-child(2) {
+        order: 2;
+        flex: 0 0 auto;
+        color: #8b8b8b;
+        font-size: 10.5px;
+      }
+
+      [data-theme="dark"] #transactionsTable td:nth-child(2) {
+        color: #a5a5a5;
+      }
+
+      #transactionsTable td:nth-child(2)::before {
+        content: none;
+      }
+
+      #transactionsTable td:nth-child(6) {
+        order: 3;
+        flex: 1 1 80px;
+        display: block;
+        font-size: 12.5px;
+        font-weight: bold;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      #transactionsTable td:nth-child(6)::before {
+        content: none;
+      }
+
+      #transactionsTable td:nth-child(7) {
+        order: 4;
+        flex: 0 0 auto;
+        font-size: 13px;
+        font-weight: bold;
+        white-space: nowrap;
+      }
+
+      #transactionsTable td:nth-child(7)::before {
+        content: none;
+      }
+
+      /* السطر الثاني: المدين والدائن والخصم + الأزرار */
+      /* لون العملية: المدين أخضر والدائن أحمر */
+      #transactionsTable td:nth-child(3) {
+        order: 6;
+        flex: 0 0 auto;
+        color: var(--success);
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+      #transactionsTable td:nth-child(4) {
+        order: 6;
+        flex: 0 0 auto;
+        color: var(--danger);
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+      #transactionsTable td:nth-child(5) {
+        order: 6;
+        flex: 0 0 auto;
+        color: #6b6b6b;
+        font-size: 10.5px;
+      }
+
+      [data-theme="dark"] #transactionsTable td:nth-child(5) {
+        color: #b5b5b5;
+      }
+
+      #transactionsTable td:nth-child(3)::before {
+        content: "مدين";
+        font-size: 10px;
+        color: var(--success);
+      }
+
+      #transactionsTable td:nth-child(4)::before {
+        content: "دائن";
+        font-size: 10px;
+        color: var(--danger);
+      }
+
+      #transactionsTable td:nth-child(5)::before {
+        content: "خصم";
+        font-size: 9.5px;
+      }
+
+      #transactionsTable .discount-display {
+        display: inline;
+        font-size: 9px;
+        font-weight: normal;
+        margin: 0 2px 0 0;
+      }
+
+      /* يظهر الجانب الخاص بالعملية فقط: لا نعرض مدين 0 أو دائن 0 أو خصم 0% */
+      #transactionsTable td.zero {
+        display: none;
+      }
+
+      #transactionsTable td.row-actions {
+        order: 7;
+        flex: 0 0 auto;
+        display: flex;
+        gap: 4px;
+        padding: 0;
+        margin-inline-start: auto;
+      }
+
+      #transactionsTable td.row-actions::before {
+        content: none;
+      }
+
+      #transactionsTable td.row-actions button {
+        flex: 0 0 auto;
+        min-height: 30px;
+        padding: 3px 7px;
+        font-size: 11px;
+        line-height: 1.2;
+        border-radius: 5px;
+      }
+
+      /* تمييز نتائج البحث على الشريط كامل */
+      #transactionsTable tr.search-match {
+        background: rgba(255, 193, 7, 0.28);
+      }
+
+      #transactionsTable tr.search-match td {
+        background: transparent;
+      }
+
+      #transactionsTable tr.search-current {
+        background: rgba(255, 152, 0, 0.5);
+        box-shadow: 0 0 0 2px var(--secondary);
+      }
+
+      #transactionsTable tr.new-inserted-row {
+        animation: highlightInsert 2.5s ease-out;
+      }
+
+      #transactionsTable tr.new-inserted-row td {
+        animation: none;
+      }
+
+      /* بطاقات سلة المحذوفات */
+      #trashTable td:nth-child(1) {
+        grid-column: 1 / -1;
+        display: block;
+        font-size: 15px;
+        padding-bottom: 6px;
+        border-bottom: 1px dashed var(--gray);
+        margin-bottom: 4px;
+      }
+
+      #trashTable td:nth-child(1)::before {
+        content: none;
+      }
+
+      #trashTable td:nth-child(2) {
+        grid-column: 1 / -1;
+        font-size: 12.5px;
+      }
+
+      #trashTable td:nth-child(3),
+      #trashTable td:nth-child(4),
+      #trashTable td:nth-child(5) {
+        font-size: 13px;
+      }
+
+      #trashTable td:last-child {
+        grid-column: 1 / -1;
+        padding-top: 6px;
+      }
+
+      #trashTable td:last-child::before {
+        content: none;
+      }
+
+      #trashTable td:last-child button {
+        width: 100%;
+        min-height: 44px;
+      }
+
+      /* السجلات المحفوظة */
+      .log-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding: 12px;
+      }
+
+      .log-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+
+      .log-actions .small-btn {
+        min-height: 44px;
+        font-size: 13px;
+      }
+
+      .summary {
+        font-size: 15px;
+        padding: 12px;
+        line-height: 2;
+      }
+
+      /* النوافذ المنبثقة كألواح سفلية */
+      .modal {
+        align-items: flex-end;
+      }
+
+      .modal-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 92vh;
+        border-radius: 18px 18px 0 0;
+        padding: 16px 16px calc(24px + env(safe-area-inset-bottom));
+        box-sizing: border-box;
+        animation: sheetUp 0.25s ease-out;
+      }
+
+      @keyframes sheetUp {
+        from { transform: translateY(40px); opacity: 0.4; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+
+      .modal-header h3 {
+        font-size: 16px;
+        margin: 0;
+      }
+
+      .close-btn {
+        font-size: 28px;
+        padding: 0 6px;
+      }
+
+      /* تقرير التسوية */
+      .mobile-only {
+        display: block;
+      }
+
+      #reportPreviewWrap {
+        justify-content: flex-start !important;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .auto-save-indicator {
+        bottom: calc(12px + env(safe-area-inset-bottom));
+        left: 12px;
+        right: 12px;
+        text-align: center;
+        padding: 10px 15px;
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="auto-save-indicator" id="autoSaveIndicator">💾 تم الحفظ تلقائياً</div>
+
+  <div class="container">
+    <div class="header-row">
+      <h2>📒 نوت الحسابات</h2>
+      <div class="controls">
+        <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+        <button class="btn-warning trash-indicator" onclick="showTrash()">
+          🗑️ سلة المحذوفات
+          <span class="trash-badge" id="trashCount">0</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="navigation-info">
+      <strong>استخدم السهمين للتنقل:</strong>
+      <span class="arrow-key">→</span> للخانة السابقة | 
+      <span class="arrow-key">←</span> للخانة التالية | 
+      <span class="arrow-key">Enter</span> للإضافة
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('main')">العمليات الحالية</div>
+      <div class="tab" onclick="switchTab('saved')">السجلات المحفوظة</div>
+      <div class="tab" onclick="switchTab('trash')">سلة المحذوفات</div>
+    </div>
+
+    <!-- تبويب العمليات الرئيسي -->
+    <div class="tab-content active" id="main-tab">
+      <div class="stats-container">
+        <div class="stat-card">
+          <div>إجمالي المدين</div>
+          <div class="stat-value" id="totalDebitStat">0</div>
+        </div>
+        <div class="stat-card">
+          <div>إجمالي الدائن</div>
+          <div class="stat-value" id="totalCreditStat">0</div>
+        </div>
+        <div class="stat-card">
+          <div>الرصيد النهائي</div>
+          <div class="stat-value" id="balanceStat">0</div>
+        </div>
+        <div class="stat-card">
+          <div>عدد العمليات</div>
+          <div class="stat-value" id="transactionsCount">0</div>
+        </div>
+      </div>
+
+      <div class="discount-info" id="discountInfo">
+        نسبة الخصم الحالية: <span id="currentDiscount">0</span>%
+        &nbsp;|&nbsp;
+        <label for="discountTarget">تطبيق الخصم على:</label>
+        <select id="discountTarget" onchange="updateDiscountTarget()">
+          <option value="both">المدين والدائن</option>
+          <option value="debit">المدين فقط</option>
+          <option value="credit">الدائن فقط</option>
+        </select>
+      </div>
+
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="🔍 بحث في الأرقام والوصف والتاريخ... (Enter للنتيجة التالية)" oninput="filterTransactions()" enterkeyhint="search">
+        <span class="search-count" id="searchCount"></span>
+        <button class="sort-btn small-btn" onclick="goToMatch(-1)" title="النتيجة السابقة (Shift+Enter)">▲</button>
+        <button class="sort-btn small-btn" onclick="goToMatch(1)" title="النتيجة التالية (Enter)">▼</button>
+      </div>
+
+      <div class="filter-container">
+        <div class="sort-options">
+          <span>ترتيب العرض:</span>
+          <button class="sort-btn active" id="sortDesc" onclick="changeSortOrder('desc')">⬇️ تنازلي (الأحدث أولاً)</button>
+          <button class="sort-btn" id="sortAsc" onclick="changeSortOrder('asc')">⬆️ تصاعدي (الأقدم أولاً)</button>
+        </div>
+        
+        <button class="btn-primary" onclick="resetFilters()">إعادة التعيين</button>
+      </div>
+
+      <div class="form-row">
+        <div class="input-container">
+          <div class="navigation-hint">← →</div>
+          <input type="number" id="debit" placeholder="💰 مدين" tabindex="1" enterkeyhint="done">
+        </div>
+        <div class="input-container">
+          <div class="navigation-hint">← →</div>
+          <input type="number" id="credit" placeholder="💵 دائن" tabindex="2" enterkeyhint="done">
+        </div>
+        <div class="input-container">
+          <div class="navigation-hint">← →</div>
+          <input type="number" id="discount" placeholder="خصم %" onchange="updateDiscount()" tabindex="3" enterkeyhint="done">
+        </div>
+        <div class="desc-input-container">
+          <div class="navigation-hint">← →</div>
+          <input type="text" id="description" list="descSuggestions" placeholder="وصف العملية" tabindex="4" enterkeyhint="done">
+          <datalist id="descSuggestions"></datalist>
+          <button type="button" id="clearDescBtn" onclick="clearCurrentPinnedDesc()" title="مسح وصف الجانب الحالي" class="btn-clear-desc">✕</button>
+          <button type="button" id="pinDescBtn" onclick="togglePinDescription()" class="pin-desc-btn pinned-debit" title="تثبيت الوصف للجانب الحالي بشكل منفصل">
+            <span id="pinDescIcon">📌</span>
+            <span id="pinDescLabel">مثبت (مدين)</span>
+          </button>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn-primary action-main" onclick="addTransaction()">➕ إضافة العملية <span class="enter-hint">(Enter)</span></button>
+
+        <div class="more-actions" id="moreActionsGroup">
+          <button class="btn-warning action-advanced" onclick="showAdvancedInsertModal()">🎯 إدراج متقدم (تحديد الموضع)</button>
+          <button class="btn-success action-save" onclick="showSaveModal()">💾 حفظ السجل</button>
+          <button class="btn-secondary action-export" onclick="showExportModal()">📊 تصدير البيانات</button>
+          <button class="btn-success action-report" onclick="openSettlementReportModal()" style="background: #10b981; color: white;" title="تقرير تسوية شيك كصورة للواتساب">🖼️ تقرير التسوية</button>
+        </div>
+
+        <button class="btn-primary action-copy" onclick="copyBalanceWithoutDecimals()">📋 نسخ الإجمالي</button>
+        <button class="btn-danger action-clear" onclick="clearTransactions()">🗑️ مسح الكل</button>
+
+        <button type="button" class="more-toggle" id="moreActionsToggle" aria-expanded="false" aria-controls="moreActionsGroup" onclick="toggleMoreActions(this)">
+          <span>⚙️</span><span class="more-label">المزيد</span><span class="chev">▾</span>
+        </button>
+      </div>
+
+      <table id="transactionsTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>التاريخ</th>
+            <th>مدين</th>
+            <th>دائن</th>
+            <th>خصم %</th>
+            <th>الوصف</th>
+            <th>الرصيد</th>
+            <th>إجراءات</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="summary">
+        إجمالي المدين: <span id="totalDebit">0</span> | 
+        إجمالي الدائن: <span id="totalCredit">0</span> <br>
+        الرصيد النهائي: <span id="balance">0</span>
+      </div>
+    </div>
+
+    <!-- تبويب السجلات المحفوظة -->
+    <div class="tab-content" id="saved-tab">
+      <div class="saved-logs-container" id="savedLogsContainer">
+        <!-- سيتم ملؤها بالسجلات المحفوظة -->
+      </div>
+    </div>
+
+    <!-- تبويب سلة المحذوفات -->
+    <div class="tab-content" id="trash-tab">
+      <div class="actions">
+        <button class="btn-success" onclick="restoreAllLogs()">🔄 استعادة الكل</button>
+        <button class="btn-danger" onclick="emptyTrash()">🗑️ تفريغ السلة</button>
+      </div>
+
+      <table id="trashTable">
+        <thead>
+          <tr>
+            <th>اسم السجل</th>
+            <th>تاريخ الحذف</th>
+            <th>عدد العمليات</th>
+            <th>إجمالي المدين</th>
+            <th>إجمالي الدائن</th>
+            <th>إجراءات</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal للتصدير -->
+  <div class="modal" id="exportModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>تصدير البيانات</h3>
+        <button class="close-btn" onclick="closeExportModal()">&times;</button>
+      </div>
+      <p>اختر طريقة التصدير:</p>
+      <div class="actions">
+        <button class="btn-primary" onclick="exportToExcel()">📊 تصدير إلى Excel</button>
+        <button class="btn-success" onclick="exportToPDF()">📄 تصدير إلى PDF</button>
+        <button class="btn-secondary" onclick="printTable()">🖨️ طباعة الجدول</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal لحفظ السجل -->
+  <div class="modal" id="saveModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>حفظ السجل</h3>
+        <button class="close-btn" onclick="closeSaveModal()">&times;</button>
+      </div>
+      <p>أدخل اسم للسجل:</p>
+      <input type="text" id="logName" placeholder="اسم السجل" style="width: 100%; margin-bottom: 15px;">
+      <div class="actions">
+        <button class="btn-success" onclick="saveLog()">💾 حفظ</button>
+        <button class="btn-secondary" onclick="closeSaveModal()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal لحذف السجل -->
+  <div class="modal" id="deleteModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>حذف السجل</h3>
+        <button class="close-btn" onclick="closeDeleteModal()">&times;</button>
+      </div>
+      <p id="deleteMessage">هل تريد حذف هذا السجل؟</p>
+      <div class="actions">
+        <button class="btn-danger" onclick="confirmDelete()">🗑️ حذف</button>
+        <button class="btn-secondary" onclick="closeDeleteModal()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal للإدراج المتقدم / تحديد موضع العملية -->
+  <div class="modal" id="advancedInsertModal">
+    <div class="modal-content" style="max-width: 550px;">
+      <div class="modal-header">
+        <h3>🎯 إدراج عملية في موضع محدد</h3>
+        <button class="close-btn" onclick="closeAdvancedInsertModal()">&times;</button>
+      </div>
+
+      <div style="background: var(--light); padding: 10px 14px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; line-height: 1.6;">
+        💡 <strong>إدراج عملية منسية:</strong> يمكنك تحديد رقم المعاملة وترتيبها بين باقي العمليات، وسيتم إعادة ترقيم العمليات وحساب الرصيد التراكمي تلقائياً.
+      </div>
+
+      <!-- اختيار الموضع -->
+      <div style="margin-bottom: 15px; border: 1px solid var(--primary); border-radius: 8px; padding: 12px; background: rgba(33, 150, 243, 0.06);">
+        <label style="display: block; font-weight: bold; margin-bottom: 6px;">📍 موضع وترتيب العملية في السجل:</label>
+        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-weight: bold; white-space: nowrap;">رقم العملية (#):</span>
+            <input type="number" id="advTargetNum" min="1" style="width: 80px; text-align: center; font-weight: bold;" oninput="onAdvTargetNumChange()">
+            <span id="advMaxNumHint" style="font-size: 12px; color: var(--text); white-space: nowrap;"></span>
+          </div>
+        </div>
+        <select id="advTargetSelect" style="width: 100%; font-size: 14px; box-sizing: border-box;" onchange="onAdvTargetSelectChange()">
+          <!-- يُملأ ديناميكياً -->
+        </select>
+      </div>
+
+      <!-- بيانات العملية -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+        <div>
+          <label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 4px;">💰 مدين:</label>
+          <input type="number" id="advDebit" placeholder="0.00" style="width: 100%; box-sizing: border-box;" oninput="updateAdvPreview()">
+        </div>
+        <div>
+          <label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 4px;">💵 دائن:</label>
+          <input type="number" id="advCredit" placeholder="0.00" style="width: 100%; box-sizing: border-box;" oninput="updateAdvPreview()">
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+        <div>
+          <label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 4px;">📉 خصم %:</label>
+          <input type="number" id="advDiscount" placeholder="0" style="width: 100%; box-sizing: border-box;" oninput="updateAdvPreview()">
+        </div>
+        <div>
+          <label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 4px;">🎯 تطبيق الخصم على:</label>
+          <select id="advDiscountTarget" style="width: 100%; box-sizing: border-box;" onchange="updateAdvPreview()">
+            <option value="both">المدين والدائن</option>
+            <option value="debit">المدين فقط</option>
+            <option value="credit">الدائن فقط</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 10px;">
+        <label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 4px;">📅 تاريخ العملية:</label>
+        <input type="date" id="advDate" style="width: 100%; box-sizing: border-box;">
+      </div>
+
+      <div style="margin-bottom: 15px;">
+        <label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 4px;">📝 وصف العملية:</label>
+        <input type="text" id="advDescription" placeholder="أدخل وصف العملية..." style="width: 100%; box-sizing: border-box;">
+      </div>
+
+      <div id="advSummaryPreview" style="background: var(--light); padding: 8px 12px; border-radius: 6px; font-size: 13px; margin-bottom: 15px; text-align: center;">
+        <!-- معاينة العملية -->
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" style="flex: 1;" onclick="submitAdvancedInsert()">➕ إدراج العملية في هذا الموضع</button>
+        <button class="btn-secondary" onclick="closeAdvancedInsertModal()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal تقرير التسوية (صورة للواتساب) -->
+  <div class="modal" id="settlementReportModal">
+    <div class="modal-content" style="max-width: 740px; max-height: 92vh; overflow-y: auto; padding: 20px;">
+      <div class="modal-header">
+        <h3>🖼️ تقرير تسوية الحساب (صورة للواتساب)</h3>
+        <button class="close-btn" onclick="closeSettlementReportModal()">&times;</button>
+      </div>
+
+      <!-- إعدادات التقرير السريعة -->
+      <div style="background: var(--light); padding: 12px; border-radius: 10px; margin-bottom: 15px;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
+          <div style="flex: 1; min-width: 220px;">
+            <label style="display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px;">👤 اسم صاحب التسوية / العميل:</label>
+            <input type="text" id="reportClientName" placeholder="اكتب اسم صاحب التسوية هنا..." oninput="renderSettlementReportCard()" style="width: 100%; box-sizing: border-box; padding: 8px 10px; font-weight: bold;">
+          </div>
+          <div style="flex: 1; min-width: 220px;">
+            <label style="display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px;">📝 ملاحظة إضافية تظهر بالتقرير (اختياري):</label>
+            <input type="text" id="reportNotes" placeholder="مثال: تم الاتفاق على موعد السداد..." oninput="renderSettlementReportCard()" style="width: 100%; box-sizing: border-box; padding: 8px 10px;">
+          </div>
+        </div>
+
+        <!-- شريط تقسيم أجزاء التقرير (يظهر تلقائياً إذا زادت العمليات عن 30) -->
+        <div id="reportPaginationBar" style="display: none; background: var(--card-bg); border: 1.5px solid var(--primary); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;"></div>
+
+        <!-- أزرار الإجراءات للتقرير -->
+        <div class="actions" style="margin-top: 5px; gap: 8px; flex-wrap: wrap;">
+          <button class="btn-primary" onclick="copySettlementReportImage()" id="btnCopyReportImg" style="background: #25D366; color: white; border: none; font-size: 14px; padding: 9px 15px; border-radius: 8px; flex: 1; min-width: 180px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>📋</span> <span id="btnCopyReportImgText">نسخ الصورة لواتساب (Ctrl+V)</span>
+          </button>
+          <button class="btn-success" onclick="downloadSettlementReportImage()" id="btnDownloadReportImg" style="font-size: 14px; padding: 9px 15px; border-radius: 8px; flex: 1; min-width: 150px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>⬇️</span> <span id="btnDownloadReportImgText">حفظ كصورة PNG</span>
+          </button>
+          <button class="btn-warning" onclick="downloadAllReportImages()" id="btnDownloadAllReportImg" style="font-size: 14px; padding: 9px 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; gap: 6px;">
+            <span>📦</span> <span id="btnDownloadAllReportImgText">حفظ جميع الأجزاء</span>
+          </button>
+          <button class="btn-primary" onclick="exportSettlementReportPDF()" id="btnExportReportPDF" style="background: #e11d48; color: white; border: none; font-size: 14px; padding: 9px 15px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>📑</span> <span id="btnExportReportPDFText">تصدير PDF</span>
+          </button>
+          <button class="btn-secondary" onclick="copyWhatsAppSummaryText()" style="font-size: 14px; padding: 9px 15px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>💬</span> نسخ نص الملخص
+          </button>
+          <button class="btn-danger" onclick="closeSettlementReportModal()" style="font-size: 14px; padding: 9px 15px; border-radius: 8px;">
+            إغلاق
+          </button>
+        </div>
+      </div>
+
+      <!-- ملاحظة تظهر على الهاتف فقط -->
+      <div class="mobile-only" style="font-size: 12px; text-align: center; margin-bottom: 8px; color: var(--text);">
+        👆 اسحب على المعاينة يميناً ويساراً لرؤية التقرير كاملاً — الصورة المحفوظة بعرض ثابت وواضح (640px)
+      </div>
+
+      <!-- حاوية المعاينة المباشرة للتقرير -->
+      <div id="reportPreviewWrap" style="overflow-x: auto; padding: 12px 6px; background: #cbd5e1; border-radius: 12px; display: flex; justify-content: center;">
+        <div id="settlementReportCardContainer">
+          <!-- يتم توليد محتوى التقرير ديناميكياً هنا -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let transactions = [];
+    let totalDebit = 0;
+    let totalCredit = 0;
+    let discountRate = 0;
+    let discountTarget = 'both';
+    let editIndex = null;
+    let searchMatches = [];   // أرقام العمليات المطابقة للبحث بترتيب ظهورها في الجدول
+    let currentMatch = 0;     // النتيجة الحالية المحددة
+    let isFiltered = false;
+    let currentTab = 'main';
+    let deleteCandidate = null;
+    let sortOrder = 'desc';
+    let autoSaveTimeout = null;
+    let selectedEntryField = localStorage.getItem("selectedEntryField") || 'debit'; // الحقل المختار للتركيز الثابت: 'debit' أو 'credit'
+    let isDescPinned = localStorage.getItem("isDescPinned") !== "false"; // تثبيت الوصف مفعل افتراضياً
+    let pinnedDebitDesc = localStorage.getItem("pinnedDebitDesc") || ""; // الوصف المثبت لجانب المدين
+    let pinnedCreditDesc = localStorage.getItem("pinnedCreditDesc") || ""; // الوصف المثبت لجانب الدائن
+
+    function updateSelectedEntryField(fieldId, skipDescUpdate = false) {
+      if (fieldId === 'debit' || fieldId === 'credit') {
+        const changed = (selectedEntryField !== fieldId);
+        selectedEntryField = fieldId;
+        localStorage.setItem("selectedEntryField", fieldId);
+
+        // تبديل الوصف المعروض فوراً حسب الجانب المختار (مدين أو دائن) بشكل منفصل تماماً
+        if (changed && isDescPinned && !skipDescUpdate && editIndex === null) {
+          const descInput = document.getElementById("description");
+          if (descInput) {
+            descInput.value = (fieldId === 'credit') ? pinnedCreditDesc : pinnedDebitDesc;
+          }
+        }
+        updatePinButtonUI();
+      }
+    }
+
+    // تحديث شكل وزر تثبيت الوصف والرمز التعبيري حسب الجانب النشط
+    function updatePinButtonUI() {
+      const btn = document.getElementById("pinDescBtn");
+      const label = document.getElementById("pinDescLabel");
+      const icon = document.getElementById("pinDescIcon");
+      if (!btn || !label) return;
+
+      btn.classList.remove("pinned-debit", "pinned-credit", "unpinned");
+
+      if (!isDescPinned) {
+        btn.classList.add("unpinned");
+        if (icon) icon.textContent = "📌";
+        label.textContent = "غير مثبت";
+        btn.title = "تثبيت الوصف معطل حالياً - اضغط لتفعيله";
+      } else {
+        if (selectedEntryField === 'credit') {
+          btn.classList.add("pinned-credit");
+          if (icon) icon.textContent = "📌";
+          label.textContent = "مثبت (دائن)";
+          btn.title = "الوصف مثبت لعمليات الدائن فقط - اضغط للتعطيل";
+        } else {
+          btn.classList.add("pinned-debit");
+          if (icon) icon.textContent = "📌";
+          label.textContent = "مثبت (مدين)";
+          btn.title = "الوصف مثبت لعمليات المدين فقط - اضغط للتعطيل";
+        }
+      }
+    }
+
+    // تفعيل أو إلغاء تفعيل خاصية تثبيت الوصف
+    function togglePinDescription() {
+      isDescPinned = !isDescPinned;
+      localStorage.setItem("isDescPinned", isDescPinned);
+      const descInput = document.getElementById("description");
+      const curVal = descInput ? descInput.value.trim() : "";
+
+      if (isDescPinned) {
+        if (curVal) {
+          if (selectedEntryField === 'credit') {
+            pinnedCreditDesc = curVal;
+            localStorage.setItem("pinnedCreditDesc", pinnedCreditDesc);
+          } else {
+            pinnedDebitDesc = curVal;
+            localStorage.setItem("pinnedDebitDesc", pinnedDebitDesc);
+          }
+        } else {
+          if (descInput) {
+            descInput.value = (selectedEntryField === 'credit') ? pinnedCreditDesc : pinnedDebitDesc;
+          }
+        }
+        showCopyNotification("📌 تم تفعيل تثبيت الوصف (" + (selectedEntryField === 'credit' ? 'للدائن' : 'للمدين') + ")");
+      } else {
+        showCopyNotification("⚪ تم إيقاف تثبيت الوصف");
+      }
+      updatePinButtonUI();
+    }
+
+    // مسح وصف الجانب الحالي بضغطة واحدة
+    function clearCurrentPinnedDesc() {
+      const descInput = document.getElementById("description");
+      if (descInput) descInput.value = "";
+
+      if (selectedEntryField === 'credit') {
+        pinnedCreditDesc = "";
+        localStorage.setItem("pinnedCreditDesc", "");
+        showCopyNotification("🗑️ تم مسح وصف الدائن");
+      } else {
+        pinnedDebitDesc = "";
+        localStorage.setItem("pinnedDebitDesc", "");
+        showCopyNotification("🗑️ تم مسح وصف المدين");
+      }
+      const target = document.getElementById(selectedEntryField) || document.getElementById("debit");
+      if (target) target.focus();
+    }
+
+    // تحديث قائمة الاقتراحات السابقة للوصف (Datalist)
+    function updateDescSuggestions() {
+      const datalist = document.getElementById("descSuggestions");
+      if (!datalist) return;
+      const uniqueDescs = new Set();
+      if (pinnedDebitDesc) uniqueDescs.add(pinnedDebitDesc);
+      if (pinnedCreditDesc) uniqueDescs.add(pinnedCreditDesc);
+
+      transactions.forEach(t => {
+        if (t.description && t.description.trim()) {
+          uniqueDescs.add(t.description.trim());
+        }
+      });
+
+      if (typeof logs === 'object' && logs !== null) {
+        Object.values(logs).forEach(log => {
+          if (log && Array.isArray(log.transactions)) {
+            log.transactions.forEach(t => {
+              if (t.description && t.description.trim()) {
+                uniqueDescs.add(t.description.trim());
+              }
+            });
+          }
+        });
+      }
+
+      datalist.innerHTML = Array.from(uniqueDescs)
+        .map(d => `<option value="${escapeHtml(d)}"></option>`)
+        .join("");
+    }
+
+    // تحميل البيانات التلقائية عند بدء التشغيل
+    function loadAutoSaveData() {
+      const autoSaveData = localStorage.getItem("currentSession");
+      if (autoSaveData) {
+        const data = JSON.parse(autoSaveData);
+        transactions = data.transactions || [];
+        totalDebit = data.totalDebit || 0;
+        totalCredit = data.totalCredit || 0;
+        discountRate = data.discountRate || 0;
+        discountTarget = data.discountTarget || 'both';
+        sortOrder = data.sortOrder || 'desc';
+        
+        // تحديث أزرار الترتيب
+        document.getElementById('sortDesc').classList.toggle('active', sortOrder === 'desc');
+        document.getElementById('sortAsc').classList.toggle('active', sortOrder === 'asc');
+        
+        document.getElementById("discount").value = discountRate;
+        document.getElementById("discountTarget").value = discountTarget;
+        updateDiscountDisplay();
+
+        updateTable();
+        updateSummary();
+        updateStats();
+        
+        console.log("✅ تم تحميل البيانات التلقائية");
+      }
+    }
+
+    // حفظ البيانات تلقائياً
+    function autoSave() {
+      const saveData = {
+        transactions,
+        totalDebit,
+        totalCredit,
+        discountRate,
+        discountTarget,
+        sortOrder,
+        timestamp: new Date().toISOString()
+      };
+      
+      localStorage.setItem("currentSession", JSON.stringify(saveData));
+      
+      // إظهار مؤشر الحفظ
+      showAutoSaveIndicator();
+    }
+
+    // إظهار مؤشر الحفظ التلقائي
+    function showAutoSaveIndicator() {
+      const indicator = document.getElementById('autoSaveIndicator');
+      indicator.classList.add('show');
+      setTimeout(() => {
+        indicator.classList.remove('show');
+      }, 2000);
+    }
+
+    // جدولة الحفظ التلقائي
+    function scheduleAutoSave() {
+      if (autoSaveTimeout) {
+        clearTimeout(autoSaveTimeout);
+      }
+      autoSaveTimeout = setTimeout(autoSave, 1000); // حفظ بعد ثانية من آخر تغيير
+    }
+
+    // تحميل السجلات من localStorage
+    let logs = JSON.parse(localStorage.getItem("logs") || "{}");
+    let trash = JSON.parse(localStorage.getItem("trash") || "{}");
+    updateSavedLogsDisplay();
+    updateTrashTable();
+    updateTrashCount();
+
+    // تحميل إعدادات السمة
+    const currentTheme = localStorage.getItem("theme") || "light";
+    document.documentElement.setAttribute("data-theme", currentTheme);
+    updateThemeColorMeta(currentTheme);
+
+    // إضافة التنقل بالسهمين
+    document.addEventListener('keydown', function(event) {
+      // تجاهل إذا كان المستخدم يكتب في حقل نصي
+      if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+        // حقل البحث: Enter للنتيجة التالية و Shift+Enter للنتيجة السابقة
+        if (event.target.id === 'searchInput') {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            goToMatch(event.shiftKey ? -1 : 1);
+          }
+          return;
+        }
+        
+        // التعامل مع السهمين في خانات الإدخال فقط (مدين، دائن، خصم، وصف)
+        const entryFields = ['debit', 'credit', 'discount', 'description'];
+        if ((event.key === 'ArrowRight' || event.key === 'ArrowLeft') && entryFields.includes(event.target.id)) {
+          event.preventDefault();
+          navigateFields(event.key);
+        }
+        
+        // التعامل مع Enter في الحقول
+        if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault();
+          if (event.target.id === 'logName') {
+            saveLog();
+          } else if (event.target.closest('#advancedInsertModal')) {
+            submitAdvancedInsert();
+          } else {
+            addTransaction();
+          }
+        }
+        return;
+      }
+
+      // إغلاق النوافذ المنبثقة بزر Escape
+      if (event.key === 'Escape') {
+        closeAdvancedInsertModal();
+        closeSaveModal();
+        closeExportModal();
+        closeDeleteModal();
+        closeSettlementReportModal();
+        return;
+      }
+
+      // تجاهل إذا كان زر Ctrl أو Alt أو Shift مضغوط
+      if (event.ctrlKey || event.altKey || event.shiftKey) {
+        return;
+      }
+
+      // التعامل مع السهمين خارج الحقول
+      if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+        event.preventDefault();
+        navigateFields(event.key);
+      }
+      
+      // التعامل مع Enter خارج الحقول
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        addTransaction();
+      }
+    });
+
+    // دالة التنقل بين الحقول
+    function navigateFields(direction) {
+      const fields = ['debit', 'credit', 'discount', 'description'];
+      const currentField = document.activeElement ? document.activeElement.id : '';
+      const currentIndex = fields.indexOf(currentField);
+      
+      let nextIndex;
+      
+      // الصفحة من اليمين لليسار (RTL): مدين في أقصى اليمين ثم دائن ثم الخصم ثم الوصف
+      // لذلك السهم الأيسر ← ينقل للخانة التالية (يساراً) والسهم الأيمن → ينقل للخانة السابقة (يميناً)
+      if (direction === 'ArrowLeft') {
+        nextIndex = currentIndex < fields.length - 1 ? currentIndex + 1 : 0;
+      } else if (direction === 'ArrowRight') {
+        nextIndex = currentIndex > 0 ? currentIndex - 1 : fields.length - 1;
+      }
+      
+      // إذا لم يكن هناك حقل محدد حالياً:
+      // السهم الأيسر ← يتجه نحو حقل دائن (يسار مدين)
+      // السهم الأيمن → يتجه نحو حقل مدين (أقصى اليمين)
+      if (currentIndex === -1) {
+        if (direction === 'ArrowLeft') {
+          nextIndex = 1; // دائن
+        } else {
+          nextIndex = 0; // مدين
+        }
+      }
+      
+      const nextField = document.getElementById(fields[nextIndex]);
+      if (nextField) {
+        nextField.focus();
+        nextField.select();
+        if (nextField.id === 'debit' || nextField.id === 'credit') {
+          updateSelectedEntryField(nextField.id);
+        }
+      }
+    }
+
+    // تبديل التبويبات
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
+      document.getElementById(`${tabName}-tab`).classList.add('active');
+      
+      currentTab = tabName;
+      
+      if (tabName === 'saved') {
+        updateSavedLogsDisplay();
+      }
+    }
+
+    // تحديث عرض السجلات المحفوظة
+    function updateSavedLogsDisplay() {
+      const container = document.getElementById("savedLogsContainer");
+      container.innerHTML = "";
+      
+      if (Object.keys(logs).length === 0) {
+        container.innerHTML = '<p style="text-align: center; padding: 20px;">لا توجد سجلات محفوظة</p>';
+        return;
+      }
+      
+      Object.keys(logs).forEach(name => {
+        const log = logs[name];
+        const logItem = document.createElement("div");
+        logItem.className = "log-item";
+        logItem.innerHTML = `
+          <div>
+            <strong>${escapeHtml(name)}</strong>
+            <div style="font-size: 14px; color: var(--text); margin-top: 5px;">
+              عدد العمليات: ${log.transactions.length} | 
+              إجمالي المدين: ${log.totalDebit.toFixed(2)} | 
+              إجمالي الدائن: ${log.totalCredit.toFixed(2)}
+            </div>
+          </div>
+          <div class="log-actions">
+            <button class="btn-primary small-btn" data-name="${escapeHtml(name)}" onclick="loadSavedLog(this.dataset.name)">📂 فتح</button>
+            <button class="btn-danger small-btn" data-name="${escapeHtml(name)}" onclick="deleteSavedLog(this.dataset.name)">🗑️ حذف</button>
+          </div>
+        `;
+        container.appendChild(logItem);
+      });
+    }
+
+    // تحميل سجل محفوظ
+    function loadSavedLog(logName) {
+      if (!logs[logName]) return;
+      
+      const log = logs[logName];
+      // نسخة مستقلة حتى لا يتغير السجل المحفوظ عند تعديل العمليات الحالية
+      transactions = JSON.parse(JSON.stringify(log.transactions));
+      recalcTotals();
+      discountRate = log.discountRate || 0;
+      sortOrder = log.sortOrder || 'desc';
+      
+      // تحديث أزرار الترتيب
+      document.getElementById('sortDesc').classList.toggle('active', sortOrder === 'desc');
+      document.getElementById('sortAsc').classList.toggle('active', sortOrder === 'asc');
+      
+      document.getElementById("discount").value = discountRate;
+      updateDiscountDisplay();
+
+      updateTable();
+      updateSummary();
+      updateStats();
+      
+      // حفظ تلقائي للبيانات الجديدة
+      scheduleAutoSave();
+      
+      // الانتقال إلى تبويب العمليات الحالية
+      switchTab('main');
+      
+      alert(`✅ تم تحميل السجل: ${logName}`);
+    }
+
+    // حذف سجل محفوظ - ينقله إلى سلة المحذوفات (عن طريق نافذة التأكيد)
+    function deleteSavedLog(logName) {
+      deleteLog(logName);
+    }
+
+    // تغيير ترتيب العرض
+    function changeSortOrder(order) {
+      sortOrder = order;
+      
+      // تحديث أزرار الترتيب
+      document.getElementById('sortDesc').classList.toggle('active', order === 'desc');
+      document.getElementById('sortAsc').classList.toggle('active', order === 'asc');
+      
+      // إعادة عرض الجدول
+      updateTable();
+      
+      // حفظ تلقائي
+      scheduleAutoSave();
+    }
+
+    // عرض سلة المحذوفات
+    function showTrash() {
+      switchTab('trash');
+    }
+
+    // تحديث عرض نسبة الخصم
+    function updateDiscountDisplay() {
+      document.getElementById("currentDiscount").textContent = discountRate;
+    }
+
+    // تحديث نسبة الخصم - بدون إشعار
+    function updateDiscount() {
+      const discountInput = document.getElementById("discount").value;
+      if (discountInput !== "") {
+        discountRate = parseFloat(discountInput) || 0;
+        updateDiscountDisplay();
+        
+        // لا يوجد إشعار هنا - الخصم يطبق فقط على العمليات الجديدة
+      } else {
+        discountRate = 0;
+        updateDiscountDisplay();
+      }
+      
+      // حفظ تلقائي
+      scheduleAutoSave();
+    }
+
+    function updateDiscountTarget() {
+      discountTarget = document.getElementById("discountTarget").value;
+      scheduleAutoSave();
+    }
+
+    // إضافة عملية
+    function addTransaction() {
+      const debit = parseFloat(document.getElementById("debit").value) || 0;
+      const credit = parseFloat(document.getElementById("credit").value) || 0;
+      const description = document.getElementById("description").value.trim();
+      const date = new Date().toISOString().split('T')[0];
+
+      // إذا ضغط المستخدم Enter داخل حقل الوصف دون إدخال مبالغ، يتم تثبيت الوصف وتوجيه المؤشر فوراً لخانة الإدخال
+      if (document.activeElement && document.activeElement.id === 'description' && debit === 0 && credit === 0 && editIndex === null) {
+        if (isDescPinned) {
+          if (selectedEntryField === 'credit') {
+            pinnedCreditDesc = description;
+            localStorage.setItem("pinnedCreditDesc", pinnedCreditDesc);
+          } else {
+            pinnedDebitDesc = description;
+            localStorage.setItem("pinnedDebitDesc", pinnedDebitDesc);
+          }
+          updatePinButtonUI();
+          showCopyNotification("📌 تم تثبيت الوصف (" + (selectedEntryField === 'credit' ? 'للدائن' : 'للمدين') + ")");
+        }
+        const targetInput = document.getElementById(selectedEntryField) || document.getElementById("debit");
+        if (targetInput) {
+          targetInput.focus();
+          targetInput.select();
+        }
+        return;
+      }
+
+      let discountedDebit = debit;
+      let originalDebit = debit;
+      let discountedCredit = credit;
+      let originalCredit = credit;
+      
+      // تطبيق الخصم بناءً على الاختيار (مدين فقط، دائن فقط، أو كلاهما)
+      if (discountRate > 0) {
+        if (debit > 0 && (discountTarget === 'both' || discountTarget === 'debit')) {
+          discountedDebit = debit - (debit * discountRate / 100);
+        }
+        if (credit > 0 && (discountTarget === 'both' || discountTarget === 'credit')) {
+          discountedCredit = credit - (credit * discountRate / 100);
+        }
+      }
+
+      const txData = {
+        debit: discountedDebit,
+        originalDebit: originalDebit,
+        credit: discountedCredit,
+        originalCredit: originalCredit,
+        discount: discountRate,
+        discountTarget: discountTarget,
+        description,
+        date
+      };
+
+      if (editIndex !== null) {
+        // تعديل عملية قديمة - مع الاحتفاظ بتاريخها الأصلي
+        txData.date = transactions[editIndex] && transactions[editIndex].date ? transactions[editIndex].date : date;
+        transactions[editIndex] = txData;
+        editIndex = null;
+      } else {
+        // إضافة عملية جديدة - التخزين دائماً من الأحدث للأقدم
+        transactions.unshift(txData);
+      }
+
+      recalcTotals();
+      updateTable();
+      updateSummary();
+      updateStats();
+
+      // تحديد وتحديث الجانب النشط (مدين أو دائن) وتثبيت الوصف للجانب المحدد فقط
+      let activeSide = selectedEntryField;
+      if (debit > 0 && credit === 0) {
+        activeSide = 'debit';
+      } else if (credit > 0 && debit === 0) {
+        activeSide = 'credit';
+      }
+      updateSelectedEntryField(activeSide, true);
+
+      if (isDescPinned) {
+        if (activeSide === 'debit') {
+          pinnedDebitDesc = description;
+          localStorage.setItem("pinnedDebitDesc", pinnedDebitDesc);
+        } else if (activeSide === 'credit') {
+          pinnedCreditDesc = description;
+          localStorage.setItem("pinnedCreditDesc", pinnedCreditDesc);
+        }
+      }
+
+      document.getElementById("debit").value = "";
+      document.getElementById("credit").value = "";
+
+      // الحفاظ على الوصف المثبت الخاص بالجانب المختار (أو مسحه إذا كان التثبيت معطلاً)
+      if (isDescPinned) {
+        const currentPinned = (selectedEntryField === 'credit') ? pinnedCreditDesc : pinnedDebitDesc;
+        document.getElementById("description").value = currentPinned;
+      } else {
+        document.getElementById("description").value = "";
+      }
+
+      updateDescSuggestions();
+      
+      // حفظ تلقائي بعد الإضافة
+      scheduleAutoSave();
+      
+      // الحفاظ على ثبات المؤشر في نفس الحقل المختار (مدين أو دائن) دون إلغائه
+      const targetInput = document.getElementById(selectedEntryField) || document.getElementById("debit");
+      if (targetInput) {
+        targetInput.focus();
+        targetInput.select();
+      }
+    }
+
+    // إعادة حساب الإجماليات
+    function recalcTotals() {
+      totalDebit = transactions.reduce((sum, t) => sum + t.debit, 0);
+      totalCredit = transactions.reduce((sum, t) => sum + t.credit, 0);
+    }
+
+    // حماية النصوص قبل إدخالها في HTML (تمنع تعطل الأزرار مع علامات مثل ' و ")
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    // تجهيز صفوف العرض:
+    // - الرصيد التراكمي يُحسب دائماً بالترتيب الزمني (من الأقدم للأحدث) على كل العمليات
+    // - ثم تُطبق الفلترة (البحث) وترتيب العرض بدون التأثير على قيمة الرصيد
+    function getDisplayRows(applySearch = true) {
+      const count = transactions.length;
+      let runningBalance = 0;
+
+      // المصفوفة مخزنة من الأحدث للأقدم، لذلك نبدأ من آخر عنصر (الأقدم)
+      let rows = [];
+      for (let i = count - 1; i >= 0; i--) {
+        const t = transactions[i];
+        runningBalance += t.debit - t.credit;
+        rows.push({ t, index: i, num: count - i, balance: runningBalance });
+      }
+
+      if (applySearch) {
+        const searchText = document.getElementById("searchInput").value.trim().toLowerCase();
+        if (searchText) {
+          rows = rows.filter(r => matchesSearch(r.t, searchText));
+        }
+      }
+
+      // تنازلي = الأحدث أولاً
+      if (sortOrder === 'desc') {
+        rows.reverse();
+      }
+
+      return rows;
+    }
+
+    // فتح/إغلاق تبويب الأزرار الإضافية في نسخة الموبايل
+    function toggleMoreActions(btn) {
+      const actions = btn.closest('.actions');
+      if (!actions) return;
+      const isExpanded = actions.classList.toggle('expanded');
+      btn.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+      const label = btn.querySelector('.more-label');
+      if (label) label.textContent = isExpanded ? 'إخفاء' : 'المزيد';
+    }
+
+    // تحديث الجدول
+    // البحث لا يخفي أي صفوف: الجدول يظهر كاملاً والصفوف المطابقة تتلون في مكانها
+    function updateTable() {
+      const tbody = document.getElementById("transactionsTable").querySelector("tbody");
+      const rows = getDisplayRows(false);
+      const searchText = document.getElementById("searchInput").value.trim().toLowerCase();
+
+      // ترتيب نتائج البحث حسب ظهورها في الجدول (من فوق لتحت)
+      searchMatches = searchText
+        ? rows.filter(r => matchesSearch(r.t, searchText)).map(r => r.index)
+        : [];
+      if (currentMatch >= searchMatches.length) currentMatch = 0;
+      updateSearchCount(searchText);
+
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="padding: 15px;">لا توجد عمليات بعد</td></tr>`;
+        return;
+      }
+
+      const matchSet = new Set(searchMatches);
+      const currentIndex = searchMatches.length ? searchMatches[currentMatch] : null;
+
+      tbody.innerHTML = rows.map(r => {
+        const t = r.t;
+        const sideClass = t.debit > 0 && !(t.credit > 0) ? 'debit-row' : (t.credit > 0 && !(t.debit > 0) ? 'credit-row' : '');
+        let rowClass = sideClass;
+        if (matchSet.has(r.index)) {
+          rowClass = (r.index === currentIndex ? 'search-match search-current' : 'search-match') + ' ' + sideClass;
+        }
+        return `<tr id="tx-row-${r.index}" class="${rowClass}">
+            <td data-label="#">${r.num}</td>
+            <td data-label="التاريخ">${escapeHtml(t.date || '-')}</td>
+            <td data-label="مدين" class="${t.debit ? '' : 'zero'}">
+              ${t.debit.toFixed(2)}
+              ${(t.discount > 0 && t.originalDebit !== t.debit) ? `<div class="discount-display">(قبل الخصم: ${(t.originalDebit || t.debit).toFixed(2)})</div>` : ''}
+            </td>
+            <td data-label="دائن" class="${t.credit ? '' : 'zero'}">
+              ${t.credit.toFixed(2)}
+              ${(t.discount > 0 && t.originalCredit !== t.credit) ? `<div class="discount-display">(قبل الخصم: ${(t.originalCredit || t.credit).toFixed(2)})</div>` : ''}
+            </td>
+            <td data-label="خصم %" class="${t.discount ? '' : 'zero'}">${t.discount}%</td>
+            <td data-label="الوصف">${escapeHtml(t.description)}</td>
+            <td data-label="الرصيد" class="${r.balance >= 0 ? 'positive' : 'negative'}">${r.balance.toFixed(2)}</td>
+            <td class="row-actions">
+              <button class="edit-btn" onclick="editTransaction(${r.index})">✏️ تعديل</button>
+              <button class="delete-btn" onclick="deleteTransaction(${r.index})">🗑️ حذف</button>
+            </td>
+          </tr>`;
+      }).join('');
+    }
+
+    // عداد نتائج البحث (مثال: 2 من 5)
+    function updateSearchCount(searchText) {
+      const el = document.getElementById("searchCount");
+      if (!searchText) {
+        el.textContent = "";
+      } else if (searchMatches.length === 0) {
+        el.textContent = "لا توجد نتائج";
+      } else {
+        el.textContent = `${currentMatch + 1} من ${searchMatches.length}`;
+      }
+    }
+
+    // التمرير للنتيجة الحالية في منتصف الشاشة
+    function scrollToCurrentMatch() {
+      if (!searchMatches.length) return;
+      const row = document.getElementById(`tx-row-${searchMatches[currentMatch]}`);
+      if (row) {
+        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    // الانتقال للنتيجة التالية (1) أو السابقة (-1)
+    function goToMatch(step) {
+      if (!searchMatches.length) return;
+      currentMatch = (currentMatch + step + searchMatches.length) % searchMatches.length;
+      updateTable();
+      scrollToCurrentMatch();
+    }
+
+    // تعديل عملية
+    function editTransaction(index) {
+      const t = transactions[index];
+      document.getElementById("debit").value = t.originalDebit !== undefined ? t.originalDebit : t.debit;
+      document.getElementById("credit").value = t.originalCredit !== undefined ? t.originalCredit : t.credit;
+      document.getElementById("discount").value = t.discount;
+      
+      if (t.discountTarget) {
+        document.getElementById("discountTarget").value = t.discountTarget;
+        discountTarget = t.discountTarget;
+      }
+      
+      document.getElementById("description").value = t.description;
+      discountRate = t.discount;
+      updateDiscountDisplay();
+      editIndex = index;
+      
+      // حفظ تلقائي
+      scheduleAutoSave();
+      
+      // توجيه المؤشر للحقل المناسب بناءً على العملية (دائن أو مدين) وتحديث الاختيار الثابت
+      if (t.credit > 0 && (!t.debit || t.debit === 0)) {
+        updateSelectedEntryField('credit', true);
+        const creditEl = document.getElementById("credit");
+        if (creditEl) { creditEl.focus(); creditEl.select(); }
+      } else if (t.debit > 0 && (!t.credit || t.credit === 0)) {
+        updateSelectedEntryField('debit', true);
+        const debitEl = document.getElementById("debit");
+        if (debitEl) { debitEl.focus(); debitEl.select(); }
+      }
+    }
+
+    // حذف عملية
+    function deleteTransaction(index) {
+      if (confirm("هل تريد حذف هذه العملية؟")) {
+        transactions.splice(index, 1);
+        recalcTotals();
+        updateTable();
+        updateSummary();
+        updateStats();
+        
+        // حفظ تلقائي بعد الحذف
+        scheduleAutoSave();
+      }
+    }
+
+    // تحديث الملخص
+    function updateSummary() {
+      document.getElementById("totalDebit").textContent = totalDebit.toFixed(2);
+      document.getElementById("totalCredit").textContent = totalCredit.toFixed(2);
+      document.getElementById("balance").textContent = (totalDebit - totalCredit).toFixed(2);
+    }
+
+    // تحديث الإحصائيات
+    function updateStats() {
+      document.getElementById("totalDebitStat").textContent = totalDebit.toFixed(2);
+      document.getElementById("totalCreditStat").textContent = totalCredit.toFixed(2);
+      document.getElementById("balanceStat").textContent = (totalDebit - totalCredit).toFixed(2);
+      document.getElementById("balanceStat").className = `stat-value ${(totalDebit - totalCredit) >= 0 ? 'positive' : 'negative'}`;
+      document.getElementById("transactionsCount").textContent = transactions.length;
+    }
+
+    // نسخ نص إلى الحافظة بطريقة متوافقة مع جميع المتصفحات والملفات المحلية
+    function copyTextToClipboard(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text).catch(() => fallbackCopyText(text));
+      } else {
+        return fallbackCopyText(text);
+      }
+    }
+
+    function fallbackCopyText(text) {
+      return new Promise((resolve, reject) => {
+        try {
+          const textArea = document.createElement("textarea");
+          textArea.value = text;
+          textArea.style.position = "fixed";
+          textArea.style.top = "-9999px";
+          textArea.style.left = "-9999px";
+          textArea.setAttribute("readonly", "");
+          document.body.appendChild(textArea);
+          textArea.select();
+          const successful = document.execCommand('copy');
+          document.body.removeChild(textArea);
+          if (successful) {
+            resolve();
+          } else {
+            reject(new Error('Copy failed'));
+          }
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }
+
+    // إشعار سريع عند النسخ
+    function showCopyNotification(msg) {
+      let toast = document.getElementById("copyToast");
+      if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "copyToast";
+        toast.className = "auto-save-indicator";
+        toast.style.background = "#1976d2";
+        toast.style.fontSize = "13px";
+        toast.style.fontWeight = "bold";
+        document.body.appendChild(toast);
+      }
+      toast.textContent = msg;
+      toast.classList.add("show");
+
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2200);
+    }
+
+    // نسخ الرصيد النهائي (الإجمالي) بدون كسور أو علامة عشرية
+    function copyBalanceWithoutDecimals() {
+      const balanceVal = totalDebit - totalCredit;
+      const intVal = Math.round(balanceVal);
+      const textToCopy = intVal.toString();
+
+      copyTextToClipboard(textToCopy).then(() => {
+        showCopyNotification(`📋 تم نسخ الإجمالي: ${textToCopy}`);
+      }).catch(err => {
+        console.error("فشل النسخ:", err);
+        prompt("الرقم (اضغط Ctrl+C للنسخ):", textToCopy);
+      });
+    }
+
+    // حفظ السجل
+    function saveLog() {
+      if (transactions.length === 0) {
+        alert("⚠️ لا يوجد عمليات للحفظ!");
+        return;
+      }
+      
+      const logName = document.getElementById("logName").value.trim();
+      if (!logName) {
+        alert("⚠️ يرجى إدخال اسم للسجل!");
+        return;
+      }
+      
+      logs[logName] = {
+        // نسخة مستقلة حتى لا تتغير السجلات المحفوظة عند تعديل العمليات الحالية
+        transactions: JSON.parse(JSON.stringify(transactions)),
+        totalDebit,
+        totalCredit,
+        discountRate,
+        sortOrder
+      };
+
+      localStorage.setItem("logs", JSON.stringify(logs));
+      updateSavedLogsDisplay();
+      alert("✅ تم حفظ السجل باسم: " + logName);
+      closeSaveModal();
+    }
+
+    // مسح الكل
+    function clearTransactions() {
+      if (confirm("هل تريد مسح كل العمليات الحالية؟")) {
+        transactions = [];
+        totalDebit = 0;
+        totalCredit = 0;
+        discountRate = 0;
+        document.getElementById("discount").value = "";
+        updateDiscountDisplay();
+        updateTable();
+        updateSummary();
+        updateStats();
+        
+        // حفظ تلقائي بعد المسح
+        scheduleAutoSave();
+      }
+    }
+
+    // حذف سجل
+    function deleteLog(logName) {
+      deleteCandidate = logName;
+      document.getElementById("deleteMessage").textContent = `هل تريد حذف السجل "${logName}"؟`;
+      document.getElementById("deleteModal").style.display = "flex";
+    }
+
+    // تأكيد الحذف
+    function confirmDelete() {
+      if (deleteCandidate && logs[deleteCandidate]) {
+        // نقل السجل إلى سلة المحذوفات
+        trash[deleteCandidate] = {
+          ...logs[deleteCandidate],
+          deletedAt: new Date().toISOString()
+        };
+        
+        // حذف السجل من القائمة الرئيسية
+        delete logs[deleteCandidate];
+        
+        // حفظ التغييرات
+        localStorage.setItem("logs", JSON.stringify(logs));
+        localStorage.setItem("trash", JSON.stringify(trash));
+        
+        // تحديث الواجهة
+        updateSavedLogsDisplay();
+        updateTrashTable();
+        updateTrashCount();
+        
+        alert("✅ تم نقل السجل إلى سلة المحذوفات");
+        closeDeleteModal();
+      }
+    }
+
+    // استعادة سجل من سلة المحذوفات
+    function restoreLog(logName) {
+      if (trash[logName]) {
+        // إعادة السجل إلى القائمة الرئيسية
+        logs[logName] = { ...trash[logName] };
+        delete logs[logName].deletedAt;
+        
+        // حذف السجل من سلة المحذوفات
+        delete trash[logName];
+        
+        // حفظ التغييرات
+        localStorage.setItem("logs", JSON.stringify(logs));
+        localStorage.setItem("trash", JSON.stringify(trash));
+        
+        // تحديث الواجهة
+        updateSavedLogsDisplay();
+        updateTrashTable();
+        updateTrashCount();
+        
+        alert("✅ تم استعادة السجل بنجاح");
+      }
+    }
+
+    // استعادة كل السجلات
+    function restoreAllLogs() {
+      if (Object.keys(trash).length === 0) {
+        alert("⚠️ سلة المحذوفات فارغة!");
+        return;
+      }
+      
+      if (confirm("هل تريد استعادة جميع السجلات من سلة المحذوفات؟")) {
+        Object.keys(trash).forEach(logName => {
+          logs[logName] = { ...trash[logName] };
+          delete logs[logName].deletedAt;
+        });
+        
+        trash = {};
+        
+        // حفظ التغييرات
+        localStorage.setItem("logs", JSON.stringify(logs));
+        localStorage.setItem("trash", JSON.stringify(trash));
+        
+        // تحديث الواجهة
+        updateSavedLogsDisplay();
+        updateTrashTable();
+        updateTrashCount();
+        
+        alert("✅ تم استعادة جميع السجلات بنجاح");
+      }
+    }
+
+    // تفريغ سلة المحذوفات
+    function emptyTrash() {
+      if (Object.keys(trash).length === 0) {
+        alert("⚠️ سلة المحذوفات فارغة!");
+        return;
+      }
+      
+      if (confirm("هل تريد تفريغ سلة المحذوفات نهائياً؟ لا يمكن التراجع عن هذا الإجراء!")) {
+        trash = {};
+        localStorage.setItem("trash", JSON.stringify(trash));
+        
+        updateTrashTable();
+        updateTrashCount();
+        
+        alert("✅ تم تفريغ سلة المحذوفات");
+      }
+    }
+
+    // تحديث جدول سلة المحذوفات
+    function updateTrashTable() {
+      const tbody = document.getElementById("trashTable").querySelector("tbody");
+      tbody.innerHTML = "";
+
+      Object.keys(trash).forEach(logName => {
+        const log = trash[logName];
+        const row = `<tr>
+          <td data-label="اسم السجل">${escapeHtml(logName)}</td>
+          <td data-label="تاريخ الحذف">${new Date(log.deletedAt).toLocaleString('ar-EG')}</td>
+          <td data-label="عدد العمليات">${log.transactions.length}</td>
+          <td data-label="إجمالي المدين">${log.totalDebit.toFixed(2)}</td>
+          <td data-label="إجمالي الدائن">${log.totalCredit.toFixed(2)}</td>
+          <td>
+            <button class="restore-btn" data-name="${escapeHtml(logName)}" onclick="restoreLog(this.dataset.name)">🔄 استعادة</button>
+          </td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+
+    // تحديث عداد سلة المحذوفات
+    function updateTrashCount() {
+      document.getElementById("trashCount").textContent = Object.keys(trash).length;
+    }
+
+    // تحديث لون شريط المتصفح العلوي على الهاتف حسب السمة
+    function updateThemeColorMeta(theme) {
+      const meta = document.getElementById("themeColorMeta");
+      if (meta) meta.setAttribute("content", theme === "dark" ? "#121212" : "#eef2f7");
+    }
+
+    // تبديل السمة
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute("data-theme");
+      const newTheme = currentTheme === "light" ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+      updateThemeColorMeta(newTheme);
+    }
+
+    // البحث في العمليات الحالية: يلوّن الصفوف المطابقة ويمرر لأول نتيجة بدون إخفاء باقي الجدول
+    function filterTransactions() {
+      const searchText = document.getElementById("searchInput").value.trim();
+      isFiltered = searchText !== "";
+      currentMatch = 0;
+      updateTable();
+      scrollToCurrentMatch();
+    }
+
+    // هل العملية تطابق نص البحث؟ (البحث في العمليات الحالية فقط)
+    function matchesSearch(t, searchText) {
+      // البحث في الأرقام (المدين، الدائن، قبل الخصم)
+      const matchesNumbers =
+        t.debit.toString().includes(searchText) ||
+        t.credit.toString().includes(searchText) ||
+        (t.originalDebit && t.originalDebit.toString().includes(searchText)) ||
+        (t.originalCredit && t.originalCredit.toString().includes(searchText));
+
+      // البحث في الوصف والتاريخ
+      const matchesDescription = (t.description || "").toLowerCase().includes(searchText);
+      const matchesDate = (t.date || "").includes(searchText);
+
+      return matchesNumbers || matchesDescription || matchesDate;
+    }
+
+    // إعادة تعيين الفلاتر
+    function resetFilters() {
+      document.getElementById("searchInput").value = "";
+      isFiltered = false;
+      updateTable();
+    }
+
+    // عرض نافذة التصدير
+    function showExportModal() {
+      document.getElementById("exportModal").style.display = "flex";
+    }
+
+    // إغلاق نافذة التصدير
+    function closeExportModal() {
+      document.getElementById("exportModal").style.display = "none";
+    }
+
+    // عرض نافذة الحفظ
+    function showSaveModal() {
+      document.getElementById("saveModal").style.display = "flex";
+      // اقتراح اسم افتراضي
+      const now = new Date();
+      const defaultName = `سجل-${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')}`;
+      document.getElementById("logName").value = defaultName;
+    }
+
+    // إغلاق نافذة الحفظ
+    function closeSaveModal() {
+      document.getElementById("saveModal").style.display = "none";
+    }
+
+    // إغلاق نافذة الحذف
+    function closeDeleteModal() {
+      document.getElementById("deleteModal").style.display = "none";
+      deleteCandidate = null;
+    }
+
+    // مساعد لاختصار وصف العملية في القوائم المنسدلة
+    function shortDesc(t) {
+      if (!t) return '';
+      const desc = (t.description || '').trim();
+      const amount = (t.debit > 0 ? `مدين: ${t.debit.toFixed(2)}` : '') + 
+                     (t.credit > 0 ? `${t.debit > 0 ? ' | ' : ''}دائن: ${t.credit.toFixed(2)}` : '');
+      if (desc) {
+        return desc.length > 22 ? desc.substring(0, 20) + '...' : desc;
+      }
+      return amount || 'بدون وصف';
+    }
+
+    // عرض نافذة الإدراج المتقدم
+    function showAdvancedInsertModal(suggestedNum = null) {
+      const modal = document.getElementById("advancedInsertModal");
+      modal.style.display = "flex";
+
+      // نقل القيم المكتوبة حالياً في الواجهة الرئيسية إن وُجدت
+      const mainDebit = document.getElementById("debit").value;
+      const mainCredit = document.getElementById("credit").value;
+      const mainDiscount = document.getElementById("discount").value;
+      const mainDesc = document.getElementById("description").value;
+
+      document.getElementById("advDebit").value = mainDebit || "";
+      document.getElementById("advCredit").value = mainCredit || "";
+      document.getElementById("advDiscount").value = mainDiscount !== "" ? mainDiscount : discountRate;
+      document.getElementById("advDiscountTarget").value = discountTarget || 'both';
+      document.getElementById("advDescription").value = mainDesc || "";
+
+      // تحديد الموضع المقترح
+      const maxNum = transactions.length + 1;
+      let targetNum = suggestedNum;
+      if (!targetNum || targetNum < 1 || targetNum > maxNum) {
+        targetNum = maxNum; // افتراضياً كأحدث عملية إذا لم يُحدد
+      }
+
+      // اقتراح التاريخ بناءً على موضع الإدراج
+      const today = new Date().toISOString().split('T')[0];
+      let suggestedDate = today;
+      if (transactions.length > 0) {
+        if (targetNum <= transactions.length) {
+          const neighborTx = transactions[transactions.length - targetNum];
+          if (neighborTx && neighborTx.date) suggestedDate = neighborTx.date;
+        } else {
+          if (transactions[0] && transactions[0].date) suggestedDate = transactions[0].date;
+        }
+      }
+      document.getElementById("advDate").value = suggestedDate;
+
+      populateAdvPositions(targetNum);
+      updateAdvPreview();
+
+      // التركيز على حقل المدين أو رقم الموضع
+      setTimeout(() => {
+        if (!mainDebit && !mainCredit) {
+          document.getElementById("advDebit").focus();
+        } else {
+          document.getElementById("advTargetNum").focus();
+        }
+      }, 100);
+    }
+
+    // إغلاق نافذة الإدراج المتقدم
+    function closeAdvancedInsertModal() {
+      document.getElementById("advancedInsertModal").style.display = "none";
+    }
+
+    // ملء قائمة مواضع الإدراج ديناميكياً
+    function populateAdvPositions(selectedNum) {
+      const select = document.getElementById("advTargetSelect");
+      const numInput = document.getElementById("advTargetNum");
+      const hint = document.getElementById("advMaxNumHint");
+      const count = transactions.length;
+      const maxNum = count + 1;
+
+      select.innerHTML = "";
+      numInput.max = maxNum;
+      numInput.value = selectedNum;
+      hint.textContent = `(من 1 إلى ${maxNum})`;
+
+      if (count === 0) {
+        select.innerHTML = `<option value="1">رقم 1 (أول عملية في السجل)</option>`;
+        return;
+      }
+
+      for (let k = 1; k <= maxNum; k++) {
+        let label = "";
+        if (k === 1) {
+          const t1 = transactions[count - 1];
+          label = `رقم 1 (في البداية - قبل أقدم عملية: "${shortDesc(t1)}")`;
+        } else if (k === maxNum) {
+          const tLast = transactions[0];
+          label = `رقم ${maxNum} (في النهاية - بعد أحدث عملية: "${shortDesc(tLast)}")`;
+        } else {
+          const tPrev = transactions[count - (k - 1)]; // العملية السابقة
+          const tNext = transactions[count - k];       // العملية التالية
+          label = `رقم ${k} (بين #${k - 1}: "${shortDesc(tPrev)}" و #${k}: "${shortDesc(tNext)}")`;
+        }
+
+        const opt = document.createElement("option");
+        opt.value = k;
+        opt.textContent = label;
+        if (k === selectedNum) opt.selected = true;
+        select.appendChild(opt);
+      }
+    }
+
+    // عند تغيير رقم الموضع في حقل الإدخال
+    function onAdvTargetNumChange() {
+      const val = parseInt(document.getElementById("advTargetNum").value, 10);
+      const maxNum = transactions.length + 1;
+      if (!isNaN(val) && val >= 1 && val <= maxNum) {
+        document.getElementById("advTargetSelect").value = val;
+      }
+      updateAdvPreview();
+    }
+
+    // عند اختيار موضع من القائمة المنسدلة
+    function onAdvTargetSelectChange() {
+      const val = parseInt(document.getElementById("advTargetSelect").value, 10);
+      document.getElementById("advTargetNum").value = val;
+      updateAdvPreview();
+    }
+
+    // تحديث معاينة العملية قبل الإدراج
+    function updateAdvPreview() {
+      const debit = parseFloat(document.getElementById("advDebit").value) || 0;
+      const credit = parseFloat(document.getElementById("advCredit").value) || 0;
+      const discount = parseFloat(document.getElementById("advDiscount").value) || 0;
+      const target = document.getElementById("advDiscountTarget").value;
+      const targetNum = parseInt(document.getElementById("advTargetNum").value, 10) || 1;
+      const date = document.getElementById("advDate").value;
+
+      let discDebit = debit;
+      let discCredit = credit;
+
+      if (discount > 0) {
+        if (debit > 0 && (target === 'both' || target === 'debit')) {
+          discDebit = debit - (debit * discount / 100);
+        }
+        if (credit > 0 && (target === 'both' || target === 'credit')) {
+          discCredit = credit - (credit * discount / 100);
+        }
+      }
+
+      let text = `📍 سيتم الإدراج كعملية <strong>رقم #${targetNum}</strong>`;
+      if (date) text += ` بتاريخ <strong>${date}</strong>`;
+      if (debit > 0) {
+        text += ` | مدين: <strong>${discDebit.toFixed(2)}</strong>${discount > 0 && discDebit !== debit ? ` <small>(أصل: ${debit.toFixed(2)})</small>` : ''}`;
+      }
+      if (credit > 0) {
+        text += ` | دائن: <strong>${discCredit.toFixed(2)}</strong>${discount > 0 && discCredit !== credit ? ` <small>(أصل: ${credit.toFixed(2)})</small>` : ''}`;
+      }
+
+      document.getElementById("advSummaryPreview").innerHTML = text;
+    }
+
+    // تنفيذ الإدراج المتقدم
+    function submitAdvancedInsert() {
+      const debit = parseFloat(document.getElementById("advDebit").value) || 0;
+      const credit = parseFloat(document.getElementById("advCredit").value) || 0;
+      const discount = parseFloat(document.getElementById("advDiscount").value) || 0;
+      const target = document.getElementById("advDiscountTarget").value;
+      const date = document.getElementById("advDate").value || new Date().toISOString().split('T')[0];
+      const description = document.getElementById("advDescription").value.trim();
+      const targetNum = parseInt(document.getElementById("advTargetNum").value, 10);
+      const maxNum = transactions.length + 1;
+
+      if (debit === 0 && credit === 0) {
+        alert("⚠️ يرجى إدخال مبلغ للمدين أو الدائن!");
+        return;
+      }
+
+      if (isNaN(targetNum) || targetNum < 1 || targetNum > maxNum) {
+        alert(`⚠️ يرجى تحديد رقم صحيح لموضع العملية بين 1 و ${maxNum}!`);
+        return;
+      }
+
+      let discountedDebit = debit;
+      let originalDebit = debit;
+      let discountedCredit = credit;
+      let originalCredit = credit;
+
+      if (discount > 0) {
+        if (debit > 0 && (target === 'both' || target === 'debit')) {
+          discountedDebit = debit - (debit * discount / 100);
+        }
+        if (credit > 0 && (target === 'both' || target === 'credit')) {
+          discountedCredit = credit - (credit * discount / 100);
+        }
+      }
+
+      const txData = {
+        debit: discountedDebit,
+        originalDebit: originalDebit,
+        credit: discountedCredit,
+        originalCredit: originalCredit,
+        discount: discount,
+        discountTarget: target,
+        description: description,
+        date: date
+      };
+
+      // حساب موضع الإدراج في مصفوفة transactions (المخزنة من الأحدث للأقدم)
+      const insertIndex = transactions.length + 1 - targetNum;
+      transactions.splice(insertIndex, 0, txData);
+
+      recalcTotals();
+      updateTable();
+      updateSummary();
+      updateStats();
+
+      // تنظيف حقول الواجهة الرئيسية
+      document.getElementById("debit").value = "";
+      document.getElementById("credit").value = "";
+      if (isDescPinned) {
+        document.getElementById("description").value = (selectedEntryField === 'credit') ? pinnedCreditDesc : pinnedDebitDesc;
+      } else {
+        document.getElementById("description").value = "";
+      }
+
+      scheduleAutoSave();
+      closeAdvancedInsertModal();
+
+      // تمييز الصف المُدرج والتمرير إليه
+      setTimeout(() => {
+        const row = document.getElementById(`tx-row-${insertIndex}`);
+        if (row) {
+          row.classList.add('new-inserted-row');
+          row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+    }
+
+    // بناء صفوف التقرير (بدون أزرار) بنفس ترتيب العرض الحالي
+    function buildReportRowsHtml() {
+      return getDisplayRows(false).map(r => `<tr>
+          <td>${r.num}</td>
+          <td>${escapeHtml(r.t.date || '-')}</td>
+          <td>
+            ${r.t.debit.toFixed(2)}
+            ${(r.t.discount > 0 && r.t.originalDebit !== r.t.debit) ? `<div class="discount-display">(قبل الخصم: ${(r.t.originalDebit || r.t.debit).toFixed(2)})</div>` : ''}
+          </td>
+          <td>
+            ${r.t.credit.toFixed(2)}
+            ${(r.t.discount > 0 && r.t.originalCredit !== r.t.credit) ? `<div class="discount-display">(قبل الخصم: ${(r.t.originalCredit || r.t.credit).toFixed(2)})</div>` : ''}
+          </td>
+          <td>${r.t.discount}%</td>
+          <td>${escapeHtml(r.t.description)}</td>
+          <td>${r.balance.toFixed(2)}</td>
+        </tr>`).join('');
+    }
+
+    // بناء محتوى التقرير الكامل (للطباعة و PDF)
+    function buildReportHtml() {
+      const balance = totalDebit - totalCredit;
+      return `
+        <div class="report" dir="rtl">
+          <h2>📒 نوت الحسابات</h2>
+          <div class="report-date">تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}</div>
+          <div class="report-stats">
+            <div>إجمالي المدين: <b>${totalDebit.toFixed(2)}</b></div>
+            <div>إجمالي الدائن: <b>${totalCredit.toFixed(2)}</b></div>
+            <div>الرصيد النهائي: <b>${balance.toFixed(2)}</b></div>
+            <div>عدد العمليات: <b>${transactions.length}</b></div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>التاريخ</th><th>مدين</th><th>دائن</th><th>خصم %</th><th>الوصف</th><th>الرصيد</th>
+              </tr>
+            </thead>
+            <tbody>${buildReportRowsHtml()}</tbody>
+          </table>
+        </div>`;
+    }
+
+    // تنسيقات التقرير (ألوان ثابتة بغض النظر عن الوضع الليلي)
+    const REPORT_CSS = `
+      .report { font-family: "Segoe UI", Tahoma, Arial, sans-serif; color: #000; background: #fff; padding: 10px; direction: rtl; }
+      .report h2 { text-align: center; margin: 0 0 5px; }
+      .report .report-date { text-align: center; font-size: 12px; color: #555; margin-bottom: 10px; }
+      .report .report-stats { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; font-size: 13px; margin-bottom: 10px; }
+      .report table { width: 100%; border-collapse: collapse; font-size: 12px; }
+      .report th, .report td { border: 1px solid #999; padding: 6px; text-align: center; }
+      .report th { background: #e0e0e0; }
+      .report tr { page-break-inside: avoid; }
+      .report .discount-display { font-size: 10px; color: #666; }
+    `;
+
+    // طباعة الجدول
+    function printTable() {
+      if (transactions.length === 0) {
+        alert("⚠️ لا توجد بيانات للطباعة!");
+        return;
+      }
+
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html dir="rtl" lang="ar">
+          <head>
+            <meta charset="UTF-8">
+            <title>طباعة نوت الحسابات</title>
+            <style>
+              body { margin: 20px; }
+              ${REPORT_CSS}
+              @media print { body { margin: 0; } }
+            </style>
+          </head>
+          <body>
+            ${buildReportHtml()}
+            <script>
+              window.onload = function() {
+                window.print();
+                setTimeout(function() { window.close(); }, 500);
+              };
+            <\/script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+
+    // تصدير إلى Excel
+    function exportToExcel() {
+      if (transactions.length === 0) {
+        alert("⚠️ لا توجد بيانات للتصدير!");
+        return;
+      }
+
+      // نفس ترتيب العرض الحالي، والرصيد محسوب بالترتيب الزمني الصحيح
+      const data = getDisplayRows(false).map(r => ({
+        "#": r.num,
+        "التاريخ": r.t.date || '',
+        "مدين": r.t.debit,
+        "مدين (قبل)": r.t.originalDebit !== undefined && r.t.originalDebit !== r.t.debit ? r.t.originalDebit : '',
+        "دائن": r.t.credit,
+        "دائن (قبل)": r.t.originalCredit !== undefined && r.t.originalCredit !== r.t.credit ? r.t.originalCredit : '',
+        "خصم %": r.t.discount,
+        "الوصف": r.t.description,
+        "الرصيد": Number(r.balance.toFixed(2))
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      wb.Workbook = { Views: [{ RTL: true }] };
+      XLSX.utils.book_append_sheet(wb, ws, "نوت الحسابات");
+      XLSX.writeFile(wb, `نوت_الحسابات_${new Date().toISOString().split('T')[0]}.xlsx`);
+      closeExportModal();
+    }
+
+    // تصدير إلى PDF - يدعم العربي عن طريق رسم التقرير بالمتصفح ثم تحويله لـ PDF
+    function exportToPDF() {
+      if (transactions.length === 0) {
+        alert("⚠️ لا توجد بيانات للتصدير!");
+        return;
+      }
+
+      if (typeof html2pdf === 'undefined') {
+        alert("⚠️ مكتبة PDF لم يتم تحميلها. تأكد من الاتصال بالإنترنت ثم أعد تحميل الصفحة.");
+        return;
+      }
+
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `<style>${REPORT_CSS}</style>${buildReportHtml()}`;
+
+      html2pdf()
+        .set({
+          margin: 10,
+          filename: `نوت_الحسابات_${new Date().toISOString().split('T')[0]}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['css', 'legacy'], avoid: 'tr' }
+        })
+        .from(wrapper)
+        .save();
+
+      closeExportModal();
+    }
+
+// ==========================================
+    // دوال تقرير تسوية الحساب كصورة للواتساب
+    // ==========================================
+
+    let reportCurrentPage = 1; // الصفحة الحالية في تقرير التسوية (30 عملية كحد أقصى لكل صورة)
+
+    // الانتقال لصفحة محددة في تقرير التسوية
+    function goToReportPage(pageNum) {
+      reportCurrentPage = pageNum;
+      renderSettlementReportCard();
+    }
+
+    // فتح نافذة تقرير التسوية
+    function openSettlementReportModal() {
+      if (transactions.length === 0) {
+        alert("⚠️ لا توجد أي عمليات في الجلسة الحالية لإنشاء التقرير!");
+        return;
+      }
+      reportCurrentPage = 1;
+      renderSettlementReportCard();
+      const modal = document.getElementById("settlementReportModal");
+      if (modal) {
+        modal.style.display = "flex";
+      }
+      setTimeout(() => {
+        const nameInput = document.getElementById("reportClientName");
+        if (nameInput) nameInput.focus();
+      }, 100);
+    }
+
+    // إغلاق نافذة تقرير التسوية
+    function closeSettlementReportModal() {
+      const modal = document.getElementById("settlementReportModal");
+      if (modal) {
+        modal.style.display = "none";
+      }
+    }
+
+    // تحديث شريط تقسيم الأجزاء والأزرار المرتبطة
+    function updateReportPaginationBar(totalPages, totalTx) {
+      const bar = document.getElementById("reportPaginationBar");
+      const btnDownloadAll = document.getElementById("btnDownloadAllReportImg");
+      const btnCopyText = document.getElementById("btnCopyReportImgText");
+      const btnDownloadText = document.getElementById("btnDownloadReportImgText");
+      const btnPdfText = document.getElementById("btnExportReportPDFText");
+
+      if (!bar) return;
+
+      if (totalPages <= 1) {
+        bar.style.display = "none";
+        if (btnDownloadAll) btnDownloadAll.style.display = "none";
+        if (btnCopyText) btnCopyText.textContent = "نسخ الصورة لواتساب (Ctrl+V)";
+        if (btnDownloadText) btnDownloadText.textContent = "حفظ كصورة PNG";
+        if (btnPdfText) btnPdfText.textContent = "تصدير كـ PDF";
+        return;
+      }
+
+      bar.style.display = "block";
+      if (btnDownloadAll) {
+        btnDownloadAll.style.display = "inline-flex";
+        btnDownloadAll.innerHTML = `<span>📦</span> حفظ جميع الأجزاء (${totalPages} صور)`;
+      }
+      if (btnCopyText) btnCopyText.textContent = `نسخ صورة جزء ${reportCurrentPage} لواتساب`;
+      if (btnDownloadText) btnDownloadText.textContent = `حفظ صورة جزء ${reportCurrentPage} PNG`;
+      if (btnPdfText) btnPdfText.textContent = `تصدير PDF (${totalPages} صفحات في ملف واحد)`;
+
+      let pillsHtml = `
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div style="font-size: 13px; font-weight: bold; color: var(--text);">
+            📑 تم تقسيم التقرير إلى <b>${totalPages} صور</b> (حد أقصى 30 عملية بالصورة):
+          </div>
+          <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+      `;
+
+      for (let p = 1; p <= totalPages; p++) {
+        const startOp = (p - 1) * 30 + 1;
+        const endOp = Math.min(p * 30, totalTx);
+        const isActive = (p === reportCurrentPage);
+        const bg = isActive ? 'var(--primary)' : 'var(--light)';
+        const color = isActive ? '#ffffff' : 'var(--text)';
+        const border = isActive ? 'var(--primary)' : 'var(--gray)';
+        const weight = isActive ? 'bold' : 'normal';
+
+        pillsHtml += `
+          <button type="button" onclick="goToReportPage(${p})" style="background: ${bg}; color: ${color}; border: 1.5px solid ${border}; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: ${weight}; cursor: pointer; transition: all 0.2s;">
+            ${isActive ? '📌 ' : ''}جزء ${p} (${startOp} - ${endOp})
+          </button>
+        `;
+      }
+
+      pillsHtml += `
+          </div>
+        </div>
+      `;
+
+      bar.innerHTML = pillsHtml;
+    }
+
+    // بناء وتحديث كارت تقرير التسوية الشيك (مقسم بحد أقصى 30 عملية لكل صورة)
+    function renderSettlementReportCard() {
+      const container = document.getElementById("settlementReportCardContainer");
+      if (!container) return;
+
+      const clientNameInput = document.getElementById("reportClientName");
+      const clientName = (clientNameInput && clientNameInput.value.trim()) ? clientNameInput.value.trim() : "صاحب التسوية";
+      const notesInput = document.getElementById("reportNotes");
+      const notes = (notesInput && notesInput.value.trim()) ? notesInput.value.trim() : "";
+
+      const balance = totalDebit - totalCredit;
+      const absBalance = Math.abs(balance);
+      const amountInt = Math.round(absBalance);
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+      const timeStr = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+
+      // تحديد حالة الرصيد الصافي
+      let statusLabel = "";
+      let statusColor = "";
+      let statusBg = "";
+      let statusBorder = "";
+      let statusIcon = "";
+
+      if (balance > 0) {
+        statusLabel = "المبلغ المستحق (متبقي عليه)";
+        statusColor = "#dc2626";
+        statusBg = "linear-gradient(135deg, #fff5f5, #ffe4e6)";
+        statusBorder = "#f87171";
+        statusIcon = "🔴";
+      } else if (balance < 0) {
+        statusLabel = "المبلغ المستحق (متبقي له / دائن)";
+        statusColor = "#16a34a";
+        statusBg = "linear-gradient(135deg, #f0fdf4, #dcfce7)";
+        statusBorder = "#86efac";
+        statusIcon = "🟢";
+      } else {
+        statusLabel = "الحساب خالص ومسوى بالكامل";
+        statusColor = "#2563eb";
+        statusBg = "linear-gradient(135deg, #f8fafc, #eff6ff)";
+        statusBorder = "#93c5fd";
+        statusIcon = "⚖️";
+      }
+
+      // فحص وجود خصم في العمليات
+      const hasDebitDiscount = transactions.some(t => t.discount > 0 && t.originalDebit !== undefined && t.originalDebit !== t.debit);
+      const hasCreditDiscount = transactions.some(t => t.discount > 0 && t.originalCredit !== undefined && t.originalCredit !== t.credit);
+      const hasAnyDiscount = transactions.some(t => t.discount > 0);
+
+      // حساب إجمالي المبالغ قبل الخصم (للتذييل)
+      const totalOrigDebit = transactions.reduce((sum, t) => sum + (t.originalDebit !== undefined ? t.originalDebit : t.debit), 0);
+      const totalOrigCredit = transactions.reduce((sum, t) => sum + (t.originalCredit !== undefined ? t.originalCredit : t.credit), 0);
+
+      // تقسيم العمليات إلى صفحات بحد أقصى 30 عملية
+      const PAGE_SIZE = 30;
+      const totalTx = transactions.length;
+      const totalPages = Math.ceil(totalTx / PAGE_SIZE) || 1;
+
+      if (reportCurrentPage > totalPages) reportCurrentPage = totalPages;
+      if (reportCurrentPage < 1) reportCurrentPage = 1;
+
+      updateReportPaginationBar(totalPages, totalTx);
+
+      const allRows = getDisplayRows(false);
+      const startIndex = (reportCurrentPage - 1) * PAGE_SIZE;
+      const pageRows = allRows.slice(startIndex, startIndex + PAGE_SIZE);
+
+      // إجماليات الصفحة الحالية
+      const pageDebit = pageRows.reduce((sum, r) => sum + r.t.debit, 0);
+      const pageCredit = pageRows.reduce((sum, r) => sum + r.t.credit, 0);
+      const pageOrigDebit = pageRows.reduce((sum, r) => sum + (r.t.originalDebit !== undefined ? r.t.originalDebit : r.t.debit), 0);
+      const pageOrigCredit = pageRows.reduce((sum, r) => sum + (r.t.originalCredit !== undefined ? r.t.originalCredit : r.t.credit), 0);
+
+      // حساب الأرصدة المرحلة من الأجزاء السابقة إذا كنا في جزء بعد الأول (> 1)
+      let broughtForwardBannerHtml = "";
+      let broughtForwardRowHtml = "";
+      let prevDebit = 0;
+      let prevCredit = 0;
+      let prevOrigDebit = 0;
+      let prevOrigCredit = 0;
+      let prevBalance = 0;
+
+      if (reportCurrentPage > 1) {
+        const prevRows = allRows.slice(0, startIndex);
+        prevDebit = prevRows.reduce((sum, r) => sum + r.t.debit, 0);
+        prevCredit = prevRows.reduce((sum, r) => sum + r.t.credit, 0);
+        prevOrigDebit = prevRows.reduce((sum, r) => sum + (r.t.originalDebit !== undefined ? r.t.originalDebit : r.t.debit), 0);
+        prevOrigCredit = prevRows.reduce((sum, r) => sum + (r.t.originalCredit !== undefined ? r.t.originalCredit : r.t.credit), 0);
+        prevBalance = prevRows.length > 0 ? prevRows[prevRows.length - 1].balance : 0;
+        const prevPartLabel = (reportCurrentPage === 2) ? "الصورة الأولى" : `الأجزاء السابقة (1 إلى ${reportCurrentPage - 1})`;
+
+        // بانر تنبيه بارز في أعلى التقرير
+        broughtForwardBannerHtml = `
+          <div style="background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(37,99,235,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 20px;">📌</span>
+                <div>
+                  <div style="font-size: 13px; font-weight: 800; color: #1e40af;">
+                    رصيد مرحل من ${prevPartLabel}:
+                  </div>
+                  <div style="font-size: 11px; color: #3b82f6; margin-top: 2px;">
+                    إجمالي العمليات السابقة (1 إلى ${startIndex}) منقولة لهذا الجزء
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 12px;">
+                <div style="background: #ffffff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 4px 10px;">
+                  <span style="color: #64748b; font-size: 11px;">إجمالي المدين:</span> <strong style="color: #1e40af;">${prevDebit.toFixed(2)}</strong>
+                </div>
+                <div style="background: #ffffff; border: 1px solid #bbf7d0; border-radius: 6px; padding: 4px 10px;">
+                  <span style="color: #64748b; font-size: 11px;">إجمالي الدائن:</span> <strong style="color: #15803d;">${prevCredit.toFixed(2)}</strong>
+                </div>
+                <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 10px;">
+                  <span style="color: #64748b; font-size: 11px;">الرصيد المرحل:</span> <strong style="color: ${prevBalance >= 0 ? '#16a34a' : '#dc2626'}; direction: ltr; display: inline-block;">${prevBalance.toFixed(2)}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // صف أول داخل الجدول يوضح الرصيد المرحل بالأرقام
+        broughtForwardRowHtml = `
+          <tr style="background: #f1f5f9; border-bottom: 2px solid #94a3b8; font-weight: bold;">
+            <td style="padding: 8px 4px; text-align: center; color: #1e40af; font-size: 12px;">📌</td>
+            ${hasDebitDiscount ? `<td style="padding: 8px 4px; text-align: center; color: #64748b; font-size: 11px;">${prevOrigDebit.toFixed(2)}</td>` : ''}
+            <td style="padding: 8px 4px; text-align: center; font-weight: 800; color: #1e40af; font-size: 12px;">${prevDebit.toFixed(2)}</td>
+            ${hasCreditDiscount ? `<td style="padding: 8px 4px; text-align: center; color: #64748b; font-size: 11px;">${prevOrigCredit.toFixed(2)}</td>` : ''}
+            <td style="padding: 8px 4px; text-align: center; font-weight: 800; color: #15803d; font-size: 12px;">${prevCredit.toFixed(2)}</td>
+            ${hasAnyDiscount ? '<td style="padding: 8px 4px; text-align: center; color: #94a3b8;">-</td>' : ''}
+            <td style="padding: 8px 8px; text-align: right; color: #0f172a; font-size: 12px;">
+              <span style="background: #2563eb; color: #ffffff; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: 6px;">رصيد مرحل</span>
+              <b>إجمالي مرحل من ${prevPartLabel} (العمليات 1 - ${startIndex})</b>
+            </td>
+            <td style="padding: 8px 6px; text-align: center; font-weight: 900; color: ${prevBalance >= 0 ? '#16a34a' : '#dc2626'}; font-size: 12px; direction: ltr;">${prevBalance.toFixed(2)}</td>
+          </tr>
+        `;
+      }
+
+      // تجهيز صفوف العمليات للصفحة الحالية
+      const rowsHtml = pageRows.map((r, idx) => {
+        const isEven = idx % 2 === 0;
+        const rowBg = isEven ? '#ffffff' : '#f8fafc';
+        const balanceColor = r.balance >= 0 ? '#16a34a' : '#dc2626';
+
+        // خانة مدين قبل الخصم
+        const origDebitCell = hasDebitDiscount
+          ? `<td style="padding: 7px 4px; text-align: center; color: #64748b; font-size: 11px;">${(r.t.discount > 0 && r.t.originalDebit !== undefined && r.t.originalDebit !== r.t.debit) ? r.t.originalDebit.toFixed(2) : '-'}</td>`
+          : '';
+
+        // خانة دائن قبل الخصم
+        const origCreditCell = hasCreditDiscount
+          ? `<td style="padding: 7px 4px; text-align: center; color: #64748b; font-size: 11px;">${(r.t.discount > 0 && r.t.originalCredit !== undefined && r.t.originalCredit !== r.t.credit) ? r.t.originalCredit.toFixed(2) : '-'}</td>`
+          : '';
+
+        // خانة نسبة الخصم
+        const discountCell = hasAnyDiscount
+          ? `<td style="padding: 7px 4px; text-align: center; color: #64748b; font-size: 11px;">${r.t.discount > 0 ? r.t.discount + '%' : '-'}</td>`
+          : '';
+
+        return `
+          <tr style="background: ${rowBg}; border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 7px 4px; text-align: center; font-weight: bold; color: #64748b; font-size: 11px;">${r.num}</td>
+            ${origDebitCell}
+            <td style="padding: 7px 4px; text-align: center; font-weight: bold; color: #1e40af; font-size: 12px;">${r.t.debit > 0 ? r.t.debit.toFixed(2) : '-'}</td>
+            ${origCreditCell}
+            <td style="padding: 7px 4px; text-align: center; font-weight: bold; color: #15803d; font-size: 12px;">${r.t.credit > 0 ? r.t.credit.toFixed(2) : '-'}</td>
+            ${discountCell}
+            <td style="padding: 7px 8px; text-align: right; color: #1e293b; font-size: 12px; font-weight: 500;">${escapeHtml(r.t.description || 'عملية حسابية')}</td>
+            <td style="padding: 7px 6px; text-align: center; font-weight: bold; color: ${balanceColor}; font-size: 12px; direction: ltr;">${r.balance.toFixed(2)}</td>
+          </tr>
+        `;
+      }).join('');
+
+      // ترويسة الجدول الديناميكية
+      const tableHeaders = `
+        <tr style="background: #1e293b; color: #ffffff;">
+          <th style="padding: 8px 4px; text-align: center; border: 1px solid #334155; border-top-right-radius: 6px;">#</th>
+          ${hasDebitDiscount ? '<th style="padding: 8px 4px; text-align: center; border: 1px solid #334155; font-size: 11px;">مدين قبل الخصم</th>' : ''}
+          <th style="padding: 8px 4px; text-align: center; border: 1px solid #334155;">مدين</th>
+          ${hasCreditDiscount ? '<th style="padding: 8px 4px; text-align: center; border: 1px solid #334155; font-size: 11px;">دائن قبل الخصم</th>' : ''}
+          <th style="padding: 8px 4px; text-align: center; border: 1px solid #334155;">دائن</th>
+          ${hasAnyDiscount ? '<th style="padding: 8px 4px; text-align: center; border: 1px solid #334155;">خصم</th>' : ''}
+          <th style="padding: 8px 8px; text-align: right; border: 1px solid #334155;">البيان / الوصف</th>
+          <th style="padding: 8px 6px; text-align: center; border: 1px solid #334155; border-top-left-radius: 6px;">الرصيد</th>
+        </tr>
+      `;
+
+      // تذييل الجدول الديناميكي
+      let tableFoot = "";
+      if (totalPages > 1) {
+        const cumDebit = prevDebit + pageDebit;
+        const cumCredit = prevCredit + pageCredit;
+        const isFirstPage = (reportCurrentPage === 1);
+        const isLastPage = (reportCurrentPage === totalPages);
+
+        tableFoot = `
+          <tr style="background: #e2e8f0; font-weight: bold; border-top: 2px solid #cbd5e1; font-size: 11px;">
+            <td style="padding: 7px 4px; text-align: center; color: #334155;">مجموع هذا الجزء</td>
+            ${hasDebitDiscount ? `<td style="padding: 7px 4px; text-align: center; color: #64748b;">${pageOrigDebit.toFixed(2)}</td>` : ''}
+            <td style="padding: 7px 4px; text-align: center; color: #1e40af;">${pageDebit.toFixed(2)}</td>
+            ${hasCreditDiscount ? `<td style="padding: 7px 4px; text-align: center; color: #64748b;">${pageOrigCredit.toFixed(2)}</td>` : ''}
+            <td style="padding: 7px 4px; text-align: center; color: #15803d;">${pageCredit.toFixed(2)}</td>
+            ${hasAnyDiscount ? '<td></td>' : ''}
+            <td style="padding: 7px 8px; text-align: right; color: #475569;">(${pageRows.length} عملية${!isLastPage ? ' - يُرَحّل للصورة التالية' : ''})</td>
+            <td style="padding: 7px 4px; text-align: center; color: #0f172a; direction: ltr;">${(pageDebit - pageCredit).toFixed(2)}</td>
+          </tr>
+          ${(!isFirstPage && !isLastPage) ? `
+          <tr style="background: #f1f5f9; font-weight: bold; border-top: 1px solid #cbd5e1; font-size: 11px;">
+            <td style="padding: 7px 4px; text-align: center; color: #1e40af;">التراكمي المرحل</td>
+            ${hasDebitDiscount ? `<td></td>` : ''}
+            <td style="padding: 7px 4px; text-align: center; color: #1e40af;">${cumDebit.toFixed(2)}</td>
+            ${hasCreditDiscount ? `<td></td>` : ''}
+            <td style="padding: 7px 4px; text-align: center; color: #15803d;">${cumCredit.toFixed(2)}</td>
+            ${hasAnyDiscount ? '<td></td>' : ''}
+            <td style="padding: 7px 8px; text-align: right; color: #1e40af;">(إجمالي العمليات 1 إلى ${startIndex + pageRows.length})</td>
+            <td style="padding: 7px 4px; text-align: center; color: ${(cumDebit - cumCredit) >= 0 ? '#16a34a' : '#dc2626'}; direction: ltr;">${(cumDebit - cumCredit).toFixed(2)}</td>
+          </tr>` : ''}
+          ${isLastPage ? `
+          <tr style="background: #f8fafc; font-weight: bold; border-top: 1px solid #cbd5e1;">
+            <td style="padding: 8px 4px; text-align: center; color: #1e293b;">الإجمالي العام</td>
+            ${hasDebitDiscount ? `<td style="padding: 8px 4px; text-align: center; color: #64748b; font-size: 11px;">${totalOrigDebit.toFixed(2)}</td>` : ''}
+            <td style="padding: 8px 4px; text-align: center; color: #1e40af; font-size: 12px;">${totalDebit.toFixed(2)}</td>
+            ${hasCreditDiscount ? `<td style="padding: 8px 4px; text-align: center; color: #64748b; font-size: 11px;">${totalOrigCredit.toFixed(2)}</td>` : ''}
+            <td style="padding: 8px 4px; text-align: center; color: #15803d; font-size: 12px;">${totalCredit.toFixed(2)}</td>
+            ${hasAnyDiscount ? '<td></td>' : ''}
+            <td style="padding: 8px; text-align: right; color: #334155;">صافي الرصيد المستحق النهائي:</td>
+            <td style="padding: 8px 4px; text-align: center; color: ${statusColor}; font-size: 13px; font-weight: 900; direction: ltr;">${amountInt}</td>
+          </tr>` : ''}
+        `;
+      } else {
+        tableFoot = `
+          <tr style="background: #f1f5f9; font-weight: bold; border-top: 2px solid #cbd5e1;">
+            <td style="padding: 8px 4px; text-align: center; color: #334155;">الإجماليات</td>
+            ${hasDebitDiscount ? `<td style="padding: 8px 4px; text-align: center; color: #64748b; font-size: 11px;">${totalOrigDebit.toFixed(2)}</td>` : ''}
+            <td style="padding: 8px 4px; text-align: center; color: #1e40af; font-size: 12px;">${totalDebit.toFixed(2)}</td>
+            ${hasCreditDiscount ? `<td style="padding: 8px 4px; text-align: center; color: #64748b; font-size: 11px;">${totalOrigCredit.toFixed(2)}</td>` : ''}
+            <td style="padding: 8px 4px; text-align: center; color: #15803d; font-size: 12px;">${totalCredit.toFixed(2)}</td>
+            ${hasAnyDiscount ? '<td></td>' : ''}
+            <td style="padding: 8px; text-align: right; color: #475569;">صافي الرصيد المستحق:</td>
+            <td style="padding: 8px 4px; text-align: center; color: ${statusColor}; font-size: 13px; font-weight: 900; direction: ltr;">${amountInt}</td>
+          </tr>
+        `;
+      }
+
+      container.innerHTML = `
+        <div id="settlementReportCard" style="width: 640px; max-width: 640px; margin: 0 auto; background: #ffffff; color: #1e293b; padding: 24px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border: 1px solid #cbd5e1; font-family: 'Segoe UI', Tahoma, Arial, sans-serif; direction: rtl; box-sizing: border-box;">
+          
+          <!-- الترويسة العلوية -->
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 14px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <h2 style="margin: 0; font-size: 22px; color: #0f172a; font-weight: 800;">📑 تقرير تسوية حساب</h2>
+              ${totalPages > 1 ? `<span style="background: #2563eb; color: #ffffff; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 800; letter-spacing: 0.5px;">جزء ${reportCurrentPage} من ${totalPages}</span>` : ''}
+            </div>
+            <div style="text-align: left; font-size: 11px; color: #64748b; line-height: 1.5;">
+              <div><b>التاريخ:</b> ${dateStr}</div>
+              <div><b>الوقت:</b> ${timeStr}</div>
+            </div>
+          </div>
+
+          <!-- شارة صاحب التسوية -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 20px;">👤</span>
+              <div>
+                <span style="font-size: 11px; color: #64748b; display: block;">صاحب التسوية (العميل):</span>
+                <strong style="font-size: 17px; color: #0f172a;">${escapeHtml(clientName)}</strong>
+              </div>
+            </div>
+            <div style="font-size: 12px; color: #475569;">
+              ${totalPages > 1 
+                ? `<span>العمليات في هذا الجزء: <b>${startIndex + 1} إلى ${startIndex + pageRows.length}</b> (من إجمالي <b>${totalTx}</b>)</span>` 
+                : `<span>عدد العمليات المسجلة: <b>${totalTx}</b></span>`}
+            </div>
+          </div>
+
+          ${(reportCurrentPage === 1) ? `
+          <!-- بطاقة الرصيد الصافي البارزة (الرقم الكبير بدون كسور - تظهر فقط في أول صورة) -->
+          <div style="background: ${statusBg}; border: 2px solid ${statusBorder}; border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+            <div style="font-size: 13px; font-weight: bold; color: ${statusColor}; margin-bottom: 6px;">
+              ${statusIcon} حالة الرصيد الصافي النهائي: ${statusLabel}
+            </div>
+            <div style="font-size: 36px; font-weight: 900; color: ${statusColor}; letter-spacing: 0.5px; line-height: 1.2;">
+              ${amountInt} <span style="font-size: 18px; font-weight: normal;">ج.م</span>
+            </div>
+          </div>
+
+          <!-- بطاقات الإجماليات الكلية (تظهر فقط في أول صورة) -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 8px 12px; text-align: center;">
+              <div style="font-size: 11px; color: #1e40af; font-weight: 600;">إجمالي المدين الكلي (المطلوب)</div>
+              <div style="font-size: 18px; font-weight: 800; color: #1e3a8a;">${totalDebit.toFixed(2)}</div>
+            </div>
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 8px 12px; text-align: center;">
+              <div style="font-size: 11px; color: #15803d; font-weight: 600;">إجمالي الدائن الكلي (المدفوع)</div>
+              <div style="font-size: 18px; font-weight: 800; color: #14532d;">${totalCredit.toFixed(2)}</div>
+            </div>
+          </div>` : ''}
+
+          <!-- بانر الرصيد المرحل إن وجد -->
+          ${broughtForwardBannerHtml}
+
+          <!-- جدول تفاصيل العمليات (30 عملية كحد أقصى لكل صورة لضمان الوضوح التام) -->
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 11px;">
+            <thead>
+              ${tableHeaders}
+            </thead>
+            <tbody>
+              ${broughtForwardRowHtml}
+              ${rowsHtml}
+            </tbody>
+            <tfoot>
+              ${tableFoot}
+            </tfoot>
+          </table>
+
+          <!-- الملاحظات إن وجدت -->
+          ${notes ? `
+          <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 8px 12px; margin-bottom: 6px; font-size: 11px; color: #92400e;">
+            📌 <b>ملاحظة:</b> ${escapeHtml(notes)}
+          </div>` : ''}
+
+          ${totalPages > 1 ? `
+          <div style="text-align: center; font-size: 11px; color: #94a3b8; padding-top: 8px; border-top: 1px dashed #e2e8f0;">
+            نهاية صورة جزء (${reportCurrentPage} من ${totalPages})
+          </div>` : ''}
+
+        </div>
+      `;
+    }
+
+    // توليد كانفاس الصورة باستخدام html2canvas
+    function generateReportCanvas(callback) {
+      const card = document.getElementById("settlementReportCard");
+      if (!card) return;
+
+      if (typeof html2canvas === 'undefined') {
+        alert("⚠️ جاري تحميل مكتبة تحويل الصور، يرجى الانتظار ثوانٍ ثم المحاولة مجدداً.");
+        return;
+      }
+
+      html2canvas(card, {
+        scale: 2.5,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false
+      }).then(canvas => {
+        callback(canvas);
+      }).catch(err => {
+        console.error("html2canvas error:", err);
+        alert("⚠️ حدث خطأ أثناء تجهيز الصورة: " + (err.message || err));
+      });
+    }
+
+    // نسخ صورة التقرير مباشرة إلى الحافظة (Clipboard) للواتساب
+    function copySettlementReportImage() {
+      const btn = document.getElementById("btnCopyReportImg");
+      const origText = btn ? btn.innerHTML : '';
+      if (btn) btn.innerHTML = '⏳ جاري تجهيز الصورة...';
+
+      const totalPages = Math.ceil(transactions.length / 30) || 1;
+
+      generateReportCanvas(canvas => {
+        canvas.toBlob(blob => {
+          if (!blob) {
+            downloadCanvas(canvas);
+            if (btn) btn.innerHTML = origText;
+            return;
+          }
+
+          if (navigator.clipboard && window.ClipboardItem) {
+            const item = new ClipboardItem({ "image/png": blob });
+            navigator.clipboard.write([item]).then(() => {
+              if (btn) btn.innerHTML = '✅ تم نسخ الصورة!';
+              const partMsg = totalPages > 1 ? ` (جزء ${reportCurrentPage} من ${totalPages})` : '';
+              showCopyNotification(`✅ تم نسخ صورة التقرير${partMsg}! يمكنك الآن لصقها (Ctrl+V) مباشرة داخل واتساب`);
+              setTimeout(() => { if (btn) btn.innerHTML = origText; }, 2500);
+            }).catch(err => {
+              console.warn("ClipboardItem write failed, downloading image instead:", err);
+              downloadCanvas(canvas);
+              if (btn) btn.innerHTML = origText;
+            });
+          } else {
+            downloadCanvas(canvas);
+            if (btn) btn.innerHTML = origText;
+          }
+        }, 'image/png');
+      });
+    }
+
+    // تحميل صورة التقرير الحالية كملف PNG
+    function downloadSettlementReportImage() {
+      const btn = document.getElementById("btnDownloadReportImg");
+      const origText = btn ? btn.innerHTML : '';
+      if (btn) btn.innerHTML = '⏳ جاري الحفظ...';
+
+      generateReportCanvas(canvas => {
+        downloadCanvas(canvas);
+        if (btn) {
+          btn.innerHTML = '✅ تم التحميل!';
+          setTimeout(() => { btn.innerHTML = origText; }, 2000);
+        }
+      });
+    }
+
+    // تصدير تقرير التسوية كملف PDF مجمع (يجمع كافة الأجزاء والصور في ملف واحد)
+    async function exportSettlementReportPDF() {
+      if (transactions.length === 0) {
+        alert("⚠️ لا توجد أي عمليات في الجلسة!");
+        return;
+      }
+
+      const btn = document.getElementById("btnExportReportPDF");
+      const origHtml = btn ? btn.innerHTML : '';
+      if (btn) btn.innerHTML = '⏳ جاري إعداد PDF...';
+
+      const { jsPDF } = window.jspdf || window;
+      if (!jsPDF) {
+        alert("⚠️ مكتبة jsPDF غير متوفرة حالياً، يرجى التحقق من اتصال الإنترنت.");
+        if (btn) btn.innerHTML = origHtml;
+        return;
+      }
+
+      const initialPage = reportCurrentPage;
+      const totalTx = transactions.length;
+      const totalPages = Math.ceil(totalTx / 30) || 1;
+
+      const nameInput = document.getElementById("reportClientName");
+      const rawName = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : "صاحب_التسوية";
+      const clientName = rawName.replace(/[/\\?%*:|"<>]/g, '').replace(/\s+/g, '_');
+      const dateStr = new Date().toISOString().split('T')[0];
+
+      try {
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4',
+          compress: true
+        });
+
+        const pageWidth = 210;
+        const pageHeight = 297;
+        const margin = 8;
+        const maxW = pageWidth - margin * 2; // 194 mm
+        const maxH = pageHeight - margin * 2; // 281 mm
+
+        for (let p = 1; p <= totalPages; p++) {
+          reportCurrentPage = p;
+          renderSettlementReportCard();
+          if (btn) btn.innerHTML = `⏳ جاري معالجة صفحة ${p} من ${totalPages}...`;
+
+          await new Promise(resolve => setTimeout(resolve, 150));
+
+          const card = document.getElementById("settlementReportCard");
+          if (!card) continue;
+
+          const canvas = await html2canvas(card, {
+            scale: 2.2,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false
+          });
+
+          const imgData = canvas.toDataURL('image/jpeg', 0.95);
+          const imgRatio = canvas.width / canvas.height;
+
+          let renderW = maxW;
+          let renderH = renderW / imgRatio;
+
+          if (renderH > maxH) {
+            renderH = maxH;
+            renderW = renderH * imgRatio;
+          }
+
+          const posX = (pageWidth - renderW) / 2;
+          const posY = (pageHeight - renderH) / 2;
+
+          if (p > 1) {
+            pdf.addPage();
+          }
+
+          pdf.addImage(imgData, 'JPEG', posX, posY, renderW, renderH, undefined, 'FAST');
+        }
+
+        const filename = `تقرير_تسوية_${clientName}_${dateStr}.pdf`;
+        pdf.save(filename);
+
+        if (btn) {
+          btn.innerHTML = '✅ تم تصدير PDF!';
+          setTimeout(() => { btn.innerHTML = origHtml; }, 2500);
+        }
+        showCopyNotification(`📑 تم تصدير تقرير التسوية كملف PDF بنجاح (${totalPages} صفحة في ملف واحد)!`);
+      } catch (err) {
+        console.error("PDF export error:", err);
+        alert("⚠️ حدث خطأ أثناء تصدير ملف PDF: " + (err.message || err));
+        if (btn) btn.innerHTML = origHtml;
+      } finally {
+        reportCurrentPage = initialPage;
+        renderSettlementReportCard();
+      }
+    }
+
+    // تنزيل جميع أجزاء التقرير بالتتابع
+    async function downloadAllReportImages() {
+      const btn = document.getElementById("btnDownloadAllReportImg");
+      const origText = btn ? btn.innerHTML : '';
+      const totalTx = transactions.length;
+      const totalPages = Math.ceil(totalTx / 30) || 1;
+
+      if (totalPages <= 1) {
+        downloadSettlementReportImage();
+        return;
+      }
+
+      const initialPage = reportCurrentPage;
+      if (btn) btn.innerHTML = '⏳ جاري التحميل...';
+
+      const nameInput = document.getElementById("reportClientName");
+      const rawName = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : "صاحب_التسوية";
+      const clientName = rawName.replace(/[/\\?%*:|"<>]/g, '').replace(/\s+/g, '_');
+      const dateStr = new Date().toISOString().split('T')[0];
+
+      for (let p = 1; p <= totalPages; p++) {
+        reportCurrentPage = p;
+        renderSettlementReportCard();
+        if (btn) btn.innerHTML = `⏳ جاري حفظ جزء ${p} من ${totalPages}...`;
+
+        await new Promise(resolve => setTimeout(resolve, 150));
+
+        const card = document.getElementById("settlementReportCard");
+        if (!card) continue;
+
+        try {
+          const canvas = await html2canvas(card, {
+            scale: 2.5,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false
+          });
+
+          const filename = `تقرير_تسوية_${clientName}_جزء_${p}_من_${totalPages}_${dateStr}.png`;
+          const link = document.createElement('a');
+          link.download = filename;
+          link.href = canvas.toDataURL('image/png');
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          await new Promise(resolve => setTimeout(resolve, 350));
+        } catch (err) {
+          console.error(`Error saving report part ${p}:`, err);
+        }
+      }
+
+      // إعادة الصفحة الأصلية
+      reportCurrentPage = initialPage;
+      renderSettlementReportCard();
+
+      if (btn) {
+        btn.innerHTML = `✅ تم حفظ ${totalPages} صور!`;
+        setTimeout(() => { btn.innerHTML = origText; }, 2500);
+      }
+      showCopyNotification(`📥 تم حفظ جميع أجزاء التقرير بنجاح (${totalPages} صور)!`);
+    }
+
+    // تنزيل الكانفاس كملف صورة
+    function downloadCanvas(canvas) {
+      const nameInput = document.getElementById("reportClientName");
+      const rawName = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : "صاحب_التسوية";
+      const clientName = rawName.replace(/[/\\?%*:|"<>]/g, '').replace(/\s+/g, '_');
+      const dateStr = new Date().toISOString().split('T')[0];
+      const totalPages = Math.ceil(transactions.length / 30) || 1;
+      const partSuffix = totalPages > 1 ? `_جزء_${reportCurrentPage}_من_${totalPages}` : '';
+      const filename = `تقرير_تسوية_${clientName}${partSuffix}_${dateStr}.png`;
+
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = canvas.toDataURL('image/png');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showCopyNotification("📥 تم تحميل صورة التقرير بنجاح!");
+    }
+
+    // نسخ نص ملخص التسوية المنسق لواتساب
+    function copyWhatsAppSummaryText() {
+      if (transactions.length === 0) {
+        alert("⚠️ لا توجد عمليات في الجلسة!");
+        return;
+      }
+      const nameInput = document.getElementById("reportClientName");
+      const clientName = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : "العميل المحترم";
+      const balance = totalDebit - totalCredit;
+      const netAmount = Math.round(Math.abs(balance));
+      let statusText = "";
+      if (balance > 0) {
+        statusText = `🔴 *المبلغ المستحق (متبقي عليه):* ${netAmount} ج.م`;
+      } else if (balance < 0) {
+        statusText = `🟢 *المبلغ المستحق (متبقي له / دائن):* ${netAmount} ج.م`;
+      } else {
+        statusText = `⚖️ *حالة الحساب: خالص ومسوى تماماً (0 ج.م)*`;
+      }
+
+      const dateStr = new Date().toLocaleDateString('ar-EG');
+      const text = `📋 *تقرير تسوية حساب*
+👤 *صاحب التسوية:* ${clientName}
+📅 *التاريخ:* ${dateStr}
+---------------------------------
+💰 *إجمالي المدين:* ${totalDebit.toFixed(2)} ج.م
+💵 *إجمالي الدائن:* ${totalCredit.toFixed(2)} ج.م
+🔢 *عدد العمليات:* ${transactions.length}
+---------------------------------
+${statusText}
+---------------------------------
+_تم إرسال هذا التقرير لاعتماد وتسوية الحساب._`;
+
+      copyTextToClipboard(text).then(() => {
+        showCopyNotification("💬 تم نسخ ملخص التقرير المنسق لواتساب!");
+      });
+    }
+
+    // تحميل البيانات عند بدء التشغيل
+    window.addEventListener('load', () => {
+      // تحميل البيانات التلقائية أولاً
+      loadAutoSaveData();
+      
+      // تحديث عرض نسبة الخصم عند التحميل
+      updateDiscountDisplay();
+      
+      // مستمعو الأحداث لمتابعة اختيار المستخدم بين مدين ودائن وتثبيته
+      const debitInput = document.getElementById("debit");
+      const creditInput = document.getElementById("credit");
+      if (debitInput) {
+        debitInput.addEventListener("focus", () => updateSelectedEntryField("debit"));
+        debitInput.addEventListener("input", () => updateSelectedEntryField("debit"));
+        debitInput.addEventListener("click", () => updateSelectedEntryField("debit"));
+      }
+      if (creditInput) {
+        creditInput.addEventListener("focus", () => updateSelectedEntryField("credit"));
+        creditInput.addEventListener("input", () => updateSelectedEntryField("credit"));
+        creditInput.addEventListener("click", () => updateSelectedEntryField("credit"));
+      }
+
+      // تهيئة ومزامنة حقل الوصف المثبت
+      const descInput = document.getElementById("description");
+      if (descInput) {
+        if (isDescPinned) {
+          descInput.value = (selectedEntryField === 'credit') ? pinnedCreditDesc : pinnedDebitDesc;
+        }
+        descInput.addEventListener("input", function() {
+          if (isDescPinned && editIndex === null) {
+            if (selectedEntryField === 'credit') {
+              pinnedCreditDesc = this.value;
+              localStorage.setItem("pinnedCreditDesc", pinnedCreditDesc);
+            } else {
+              pinnedDebitDesc = this.value;
+              localStorage.setItem("pinnedDebitDesc", pinnedDebitDesc);
+            }
+          }
+        });
+      }
+
+      updatePinButtonUI();
+      updateDescSuggestions();
+
+      // التركيز على الحقل المختار (مدين أو دائن) — لا نفعله على الهاتف حتى لا تفتح لوحة المفاتيح تلقائياً
+      const isTouchDevice = window.matchMedia('(hover: none)').matches;
+      const targetInput = document.getElementById(selectedEntryField) || debitInput;
+      if (targetInput && !isTouchDevice) {
+        targetInput.focus();
+      }
+
+      console.log("✅ تم تحميل التطبيق بنجاح");
+    });
+
+    // حفظ البيانات قبل إغلاق الصفحة
+    window.addEventListener('beforeunload', function() {
+      autoSave();
+    });
+  </script>
+</body>
+</html>
